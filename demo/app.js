@@ -20,29 +20,20 @@ angular.module('demo', [
 
 .run(['$location', '$mdpLocale', function($location, $mdpLocale) {
     if (location.search !== '?useDefaults') { // Quick and dirty
-        $mdpLocale.time.minTime = "10h00";
-        $mdpLocale.time.maxTime = "22h42";
-        $mdpLocale.time.okLabel = "Valider";
-        $mdpLocale.time.cancelLabel = "Annuler";
-        $mdpLocale.time.timeFormat = "HH[h]mm";
+        $mdpLocale.time.minTime = "00:00";
+        $mdpLocale.time.maxTime = "23:59";
+        $mdpLocale.time.timeFormat = "HH:mm";
         $mdpLocale.time.noFloat = true;
-        $mdpLocale.time.openOnClick = true;
-        $mdpLocale.time.autoSwitch = true;
-        $mdpLocale.time.ampm = true;
-        $mdpLocale.time.clearOnCancel = true;
+        $mdpLocale.time.openOnClick = false;
+        $mdpLocale.time.autoSwitch = false;
+        $mdpLocale.time.ampm = false;
+        $mdpLocale.time.clearOnCancel = false;
 
 
-        $mdpLocale.date.minDate = new Date().addDays(-2);
-        $mdpLocale.date.maxDate = new Date().addDays(2);
-        $mdpLocale.date.okLabel = "Valider";
-        $mdpLocale.date.cancelLabel = "Annuler";
-        $mdpLocale.date.dateFilter = function (date) {
-            return date.getDate() % 2 !== 0;
-        };
-        $mdpLocale.date.dateFormat = "DD/MM/YYYY";
+        $mdpLocale.date.dateFormat = "DD.MM.YYYY";
         $mdpLocale.date.displayFormat = "ddd DD MMM";
         $mdpLocale.date.noFloat = true;
-        $mdpLocale.date.openOnClick = true;
-        $mdpLocale.date.clearOnCancel = true;
+        $mdpLocale.date.openOnClick = false;
+        $mdpLocale.date.clearOnCancel = false;
     }
 }]);

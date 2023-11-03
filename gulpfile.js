@@ -16,8 +16,8 @@ var outputFolder = 'dist/';
 var demoOutputFolder = 'demo-dist/';
 var moduleName = 'mdPickers';
 
-gulp.task('assets', function() {
-  return gulp.src(['src/core/**/*.less', 'src/components/**/*.less'])
+function assets(){
+    return gulp.src(['src/core/**/*.less', 'src/components/**/*.less'])
         .pipe(concat('mdPickers.less'))
         .pipe(less())
         .pipe(autoprefixer())
@@ -25,9 +25,9 @@ gulp.task('assets', function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(minify())
         .pipe(gulp.dest(outputFolder));
-});
+}
 
-gulp.task('build-app', function() {
+function buildApp() {
     return gulp.src(['src/mdPickers.js', 'src/core/**/*.js', 'src/components/**/*.js'])
         .pipe(concat('mdPickers.js'))
         .pipe(wrap('(function() {\n"use strict";\n<%= contents %>\n})();'))
@@ -37,9 +37,9 @@ gulp.task('build-app', function() {
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(outputFolder));
-});
+}
 
-gulp.task('build-demo-js', function() {
+function buildDemoJs(){
     return gulp.src(['demo/*.js'])
         .pipe(concat('demo.js'))
         .pipe(wrap('(function() {\n"use strict";\n<%= contents %>\n})();'))
@@ -49,9 +49,9 @@ gulp.task('build-demo-js', function() {
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(demoOutputFolder));
-});
+}
 
-gulp.task('build-demo-html', function() {
+function buildDemoHtml(){
     return gulp.src(['demo/*.html'])
         .pipe(htmlreplace({
             'css': '../dist/mdPickers.min.css',
@@ -59,12 +59,12 @@ gulp.task('build-demo-html', function() {
             'demojs': 'demo.min.js'
         }))
         .pipe(gulp.dest(demoOutputFolder));
-});
+}
 
-gulp.task('watch', function() {
-    gulp.watch('src/**/*', ['assets', 'build-app']);
-});
+const watchSrc = () => gulp.watch('src/**/*', gulp.series(assets, buildApp));
 
-gulp.task('default', ['assets', 'build-app']);
+const dev = gulp.series(assets, buildApp);
+exports.default = dev;
 
-gulp.task('demo', ['default', 'build-demo-js', 'build-demo-html']);
+const demo = gulp.series(assets, buildApp, buildDemoJs, buildDemoHtml);
+exports.demo = demo;
