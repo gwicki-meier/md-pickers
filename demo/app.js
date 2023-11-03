@@ -31,7 +31,7 @@ angular.module('demo', [
 
 
         $mdpLocale.date.dateFormat = "DD.MM.YYYY";
-        $mdpLocale.date.displayFormat = "ddd DD MMM";
+        $mdpLocale.date.displayFormat = "ll";
         $mdpLocale.date.noFloat = true;
         $mdpLocale.date.openOnClick = false;
         $mdpLocale.date.clearOnCancel = false;

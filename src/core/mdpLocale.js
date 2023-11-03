@@ -3,18 +3,18 @@
  */
 
 module.factory('$mdpLocale', [function () {
-    var $mdpLocale = {
+    return {
         time: {
             minTime: null,
             maxTime: null,
             okLabel: "OK",
             cancelLabel: "Cancel",
             timeFormat: "HH:mm",
-            noFloat: false,
+            noFloat: true,
             openOnClick: false,
             autoSwitch: false,
-            ampm: true,
-            clearOnCancel: false
+            ampm: false,
+            clearOnCancel: false,
         },
         date: {
             minDate: null,
@@ -24,11 +24,12 @@ module.factory('$mdpLocale', [function () {
             dateFilter: null,
             dateFormat: "YYYY-MM-DD",
             displayFormat: "ddd, MMM DD",
-            noFloat: false,
+            noFloat: true,
             openOnClick: false,
             clearOnCancel: false
+        },
+        moment: {
+            locale: "en"
         }
     };
-
-    return $mdpLocale;
 }]);

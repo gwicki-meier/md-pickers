@@ -61,7 +61,8 @@ function buildDemoHtml(){
         .pipe(gulp.dest(demoOutputFolder));
 }
 
-const watchSrc = () => gulp.watch('src/**/*', gulp.series(assets, buildApp));
+const watch = () => gulp.watch('src/**/*', gulp.series(assets, buildApp));
+exports.watch = watch;
 
 const dev = gulp.series(assets, buildApp);
 exports.default = dev;

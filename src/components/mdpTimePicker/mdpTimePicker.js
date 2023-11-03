@@ -208,46 +208,51 @@ module.provider("$mdpTimePicker", function() {
     };
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
-        var timePicker = function(time, options) {
-            if(!angular.isDate(time)) time = Date.now();
+        moment.updateLocale($mdpLocale.moment.locale, {
+            week: {
+                dow: 1
+            }
+        });
+        return function (time, options) {
+            if (!angular.isDate(time)) time = Date.now();
             if (!angular.isObject(options)) options = {};
 
             var labelOk = options.okLabel || $mdpLocale.time.okLabel || LABEL_OK;
             var labelCancel = options.cancelLabel || $mdpLocale.time.cancelLabel || LABEL_CANCEL;
 
             return $mdDialog.show({
-                controller:  ['$scope', '$mdDialog', 'time', 'autoSwitch', 'ampm', '$mdMedia', TimePickerCtrl],
+                controller: ['$scope', '$mdDialog', 'time', 'autoSwitch', 'ampm', '$mdMedia', TimePickerCtrl],
                 controllerAs: 'timepicker',
                 clickOutsideToClose: true,
                 template: '<md-dialog aria-label="" class="mdp-timepicker" ng-class="{ \'portrait\': !$mdMedia(\'gt-xs\') }">' +
-                            '<md-dialog-content layout-gt-xs="row" layout-wrap>' +
-                                '<md-toolbar layout-gt-xs="column" layout-xs="row" layout-align="center center" flex class="mdp-timepicker-time md-hue-1 md-primary">' +
-                                    '<div class="mdp-timepicker-selected-time">' +
-                                        '<span ng-class="{ \'active\': timepicker.currentView == timepicker.VIEW_HOURS }" ng-click="timepicker.currentView = timepicker.VIEW_HOURS">{{ timepicker.time.format(timepicker.hoursFormat) }}</span>:' +
+                    '<md-dialog-content layout-gt-xs="row" layout-wrap>' +
+                    '<md-toolbar layout-gt-xs="column" layout-xs="row" layout-align="center center" flex class="mdp-timepicker-time md-hue-1 md-primary">' +
+                    '<div class="mdp-timepicker-selected-time">' +
+                    '<span ng-class="{ \'active\': timepicker.currentView == timepicker.VIEW_HOURS }" ng-click="timepicker.currentView = timepicker.VIEW_HOURS">{{ timepicker.time.format(timepicker.hoursFormat) }}</span>:' +
 
-                                        '<span ng-class="{ \'active\': timepicker.currentView == timepicker.VIEW_MINUTES }" ng-click="timepicker.currentView = timepicker.VIEW_MINUTES">{{ timepicker.time.format(timepicker.minutesFormat) }}</span>' +
-                                    '</div>' +
-                                    '<div layout="column" ng-show="timepicker.ampm" class="mdp-timepicker-selected-ampm">' +
+                    '<span ng-class="{ \'active\': timepicker.currentView == timepicker.VIEW_MINUTES }" ng-click="timepicker.currentView = timepicker.VIEW_MINUTES">{{ timepicker.time.format(timepicker.minutesFormat) }}</span>' +
+                    '</div>' +
+                    '<div layout="column" ng-show="timepicker.ampm" class="mdp-timepicker-selected-ampm">' +
 
-                                        '<span ng-click="timepicker.setAM()" ng-class="{ \'active\': timepicker.time.hours() < 12 }">AM</span>' +
-                                        '<span ng-click="timepicker.setPM()" ng-class="{ \'active\': timepicker.time.hours() >= 12 }">PM</span>' +
-                                    '</div>' +
+                    '<span ng-click="timepicker.setAM()" ng-class="{ \'active\': timepicker.time.hours() < 12 }">AM</span>' +
+                    '<span ng-click="timepicker.setPM()" ng-class="{ \'active\': timepicker.time.hours() >= 12 }">PM</span>' +
+                    '</div>' +
 
-                                '</md-toolbar>' +
-                                '<md-content>' +
-                                    '<div class="mdp-clock-switch-container" ng-switch="timepicker.currentView" layout layout-align="center center">' +
-                                        '<mdp-clock class="mdp-animation-zoom" ampm="timepicker.ampm" auto-switch="timepicker.autoSwitch" time="timepicker.time" type="hours" ng-switch-when="1"></mdp-clock>' +
-                                        '<mdp-clock class="mdp-animation-zoom" ampm="timepicker.ampm" auto-switch="timepicker.autoSwitch" time="timepicker.time" type="minutes" ng-switch-when="2"></mdp-clock>' +
-                                    '</div>' +
+                    '</md-toolbar>' +
+                    '<md-content>' +
+                    '<div class="mdp-clock-switch-container" ng-switch="timepicker.currentView" layout layout-align="center center">' +
+                    '<mdp-clock class="mdp-animation-zoom" ampm="timepicker.ampm" auto-switch="timepicker.autoSwitch" time="timepicker.time" type="hours" ng-switch-when="1"></mdp-clock>' +
+                    '<mdp-clock class="mdp-animation-zoom" ampm="timepicker.ampm" auto-switch="timepicker.autoSwitch" time="timepicker.time" type="minutes" ng-switch-when="2"></mdp-clock>' +
+                    '</div>' +
 
-                                    '<md-dialog-actions layout="row">' +
-                                        '<span flex></span>' +
-                                        '<md-button ng-click="timepicker.cancel()" aria-label="' + labelCancel + '">' + labelCancel + '</md-button>' +
-                                        '<md-button ng-click="timepicker.confirm()" class="md-primary" aria-label="' + labelOk + '">' + labelOk + '</md-button>' +
-                                    '</md-dialog-actions>' +
-                                '</md-content>' +
-                            '</md-dialog-content>' +
-                        '</md-dialog>',
+                    '<md-dialog-actions layout="row">' +
+                    '<span flex></span>' +
+                    '<md-button ng-click="timepicker.cancel()" aria-label="' + labelCancel + '">' + labelCancel + '</md-button>' +
+                    '<md-button ng-click="timepicker.confirm()" class="md-primary" aria-label="' + labelOk + '">' + labelOk + '</md-button>' +
+                    '</md-dialog-actions>' +
+                    '</md-content>' +
+                    '</md-dialog-content>' +
+                    '</md-dialog>',
                 targetEvent: options.targetEvent,
                 locals: {
                     time: time,
@@ -258,8 +263,6 @@ module.provider("$mdpTimePicker", function() {
                 parent: PARENT_GETTER()
             });
         };
-
-        return timePicker;
     }];
 });
 
@@ -314,7 +317,8 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             "disabled": "=?mdpDisabled",
             "ampm": "=?mdpAmpm",
             "inputName": "@?mdpInputName",
-            "clearOnCancel": "=?mdpClearOnCancel"
+            "clearOnCancel": "=?mdpClearOnCancel",
+            "momentLocale": "@?mdpMomentLocale"
         },
         link: function(scope, element, attrs, controllers, $transclude) {
             var ngModel = controllers[0];

@@ -120,7 +120,12 @@ module.provider("$mdpDatePicker", function() {
     };
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
-        var datePicker = function(currentDate, options) {
+        moment.updateLocale($mdpLocale.moment.locale, {
+            week: {
+                dow: 1
+            }
+        });
+        return function (currentDate, options) {
             if (!angular.isDate(currentDate)) currentDate = Date.now();
             if (!angular.isObject(options)) options = {};
 
@@ -130,37 +135,37 @@ module.provider("$mdpDatePicker", function() {
             var labelCancel = options.cancelLabel || $mdpLocale.date.cancelLabel || LABEL_CANCEL;
 
             return $mdDialog.show({
-                controller:  ['$scope', '$mdDialog', '$mdMedia', '$timeout', 'currentDate', 'options', DatePickerCtrl],
+                controller: ['$scope', '$mdDialog', '$mdMedia', '$timeout', 'currentDate', 'options', DatePickerCtrl],
                 controllerAs: 'datepicker',
                 clickOutsideToClose: true,
                 template: '<md-dialog aria-label="" class="mdp-datepicker" ng-class="{ \'portrait\': !$mdMedia(\'gt-xs\') }">' +
-                            '<md-dialog-content layout="row" layout-wrap>' +
-                                '<div layout="column" layout-align="start center">' +
-                                    '<md-toolbar layout-align="start start" flex class="mdp-datepicker-date-wrapper md-hue-1 md-primary" layout="column">' +
-                                        '<span class="mdp-datepicker-year" ng-click="datepicker.showYear()" ng-class="{ \'active\': datepicker.selectingYear }">{{ datepicker.date.format(\'YYYY\') }}</span>' +
-                                        '<span class="mdp-datepicker-date" ng-click="datepicker.showCalendar()" ng-class="{ \'active\': !datepicker.selectingYear }">{{ datepicker.date.format(datepicker.displayFormat) }}</span> ' +
-                                    '</md-toolbar>' +
+                    '<md-dialog-content layout="row" layout-wrap>' +
+                    '<div layout="column" layout-align="start center">' +
+                    '<md-toolbar layout-align="start start" flex class="mdp-datepicker-date-wrapper md-hue-1 md-primary" layout="column">' +
+                    '<span class="mdp-datepicker-year" ng-click="datepicker.showYear()" ng-class="{ \'active\': datepicker.selectingYear }">{{ datepicker.date.format(\'YYYY\') }}</span>' +
+                    '<span class="mdp-datepicker-date" ng-click="datepicker.showCalendar()" ng-class="{ \'active\': !datepicker.selectingYear }">{{ datepicker.date.format(datepicker.displayFormat) }}</span> ' +
+                    '</md-toolbar>' +
 
-                                '</div>' +
+                    '</div>' +
 
-                                '<div>' +
+                    '<div>' +
 
-                                    '<div class="mdp-datepicker-select-year mdp-animation-zoom" layout="column" layout-align="center start" ng-if="datepicker.selectingYear">' +
-                                        '<md-virtual-repeat-container md-auto-shrink md-top-index="datepicker.yearTopIndex">' +
-                                            '<div flex md-virtual-repeat="item in datepicker.yearItems" md-on-demand class="repeated-year">' +
-                                                '<span class="md-button" ng-click="datepicker.selectYear(item)" md-ink-ripple ng-class="{ \'md-primary current\': item == year }">{{ item }}</span>' +
-                                            '</div>' +
-                                        '</md-virtual-repeat-container>' +
-                                    '</div>' +
-                                    '<mdp-calendar ng-if="!datepicker.selectingYear" class="mdp-animation-zoom" date="datepicker.date" min-date="datepicker.minDate" date-filter="datepicker.dateFilter" max-date="datepicker.maxDate"></mdp-calendar>' +
-                                    '<md-dialog-actions layout="row">' +
-                                        '<span flex></span>' +
-                                        '<md-button ng-click="datepicker.cancel()" aria-label="' + labelCancel + '">' + labelCancel + '</md-button>' +
-                                        '<md-button ng-click="datepicker.confirm()" class="md-primary" aria-label="' + labelOk + '">' + labelOk + '</md-button>' +
-                                    '</md-dialog-actions>' +
-                                '</div>' +
-                            '</md-dialog-content>' +
-                        '</md-dialog>',
+                    '<div class="mdp-datepicker-select-year mdp-animation-zoom" layout="column" layout-align="center start" ng-if="datepicker.selectingYear">' +
+                    '<md-virtual-repeat-container md-auto-shrink md-top-index="datepicker.yearTopIndex">' +
+                    '<div flex md-virtual-repeat="item in datepicker.yearItems" md-on-demand class="repeated-year">' +
+                    '<span class="md-button" ng-click="datepicker.selectYear(item)" md-ink-ripple ng-class="{ \'md-primary current\': item == year }">{{ item }}</span>' +
+                    '</div>' +
+                    '</md-virtual-repeat-container>' +
+                    '</div>' +
+                    '<mdp-calendar ng-if="!datepicker.selectingYear" class="mdp-animation-zoom" date="datepicker.date" min-date="datepicker.minDate" date-filter="datepicker.dateFilter" max-date="datepicker.maxDate"></mdp-calendar>' +
+                    '<md-dialog-actions layout="row">' +
+                    '<span flex></span>' +
+                    '<md-button ng-click="datepicker.cancel()" aria-label="' + labelCancel + '">' + labelCancel + '</md-button>' +
+                    '<md-button ng-click="datepicker.confirm()" class="md-primary" aria-label="' + labelOk + '">' + labelOk + '</md-button>' +
+                    '</md-dialog-actions>' +
+                    '</div>' +
+                    '</md-dialog-content>' +
+                    '</md-dialog>',
                 targetEvent: options.targetEvent,
                 locals: {
                     currentDate: currentDate,
@@ -170,8 +175,6 @@ module.provider("$mdpDatePicker", function() {
                 parent: PARENT_GETTER()
             });
         };
-
-        return datePicker;
     }];
 });
 
@@ -372,7 +375,8 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
             "openOnClick": "=mdpOpenOnClick",
             "disabled": "=?mdpDisabled",
             "inputName": "@?mdpInputName",
-            "clearOnCancel": "=?mdpClearOnCancel"
+            "clearOnCancel": "=?mdpClearOnCancel",
+            "momentLocale": "@?mdpMomentLocale"
         },
         link: {
             pre: function(scope, element, attrs, constollers, $transclude) {
