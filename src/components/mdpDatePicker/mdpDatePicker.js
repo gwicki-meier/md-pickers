@@ -359,7 +359,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         '<md-icon md-svg-icon="mdp-event"></md-icon>' +
                     '</md-button>' +
                     '<md-input-container' + (noFloat ? ' md-no-float' : '') + ' md-is-error="isError()">' +
-                        '<input name="{{ inputName }}" ng-model="model.$viewValue" ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
+                        '<input name="{{ inputName }}"  ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
                     '</md-input-container>' +
                 '</div>';
         },
@@ -487,8 +487,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         updateInputElement(strValue);
                         ngModel.$setViewValue(strValue);
                     } else {
-                        updateInputElement(date);
-                        ngModel.$setViewValue(date);
+                        updateInputElement(ngModel.$viewValue);
                     }
 
                     if(!ngModel.$pristine &&
@@ -518,11 +517,11 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 };
 
                 function onInputElementEvents(event) {
-                    if(event.target.value !== ngModel.$viewVaue)
+                    if(event.target.value !== ngModel.$viewValue)
                         updateDate(event.target.value);
                 }
 
-                inputElement.on("reset input blur", onInputElementEvents);
+                inputElement.bind("blur", onInputElementEvents);
 
                 scope.$on("$destroy", function() {
                     inputElement.off("reset input blur", onInputElementEvents);

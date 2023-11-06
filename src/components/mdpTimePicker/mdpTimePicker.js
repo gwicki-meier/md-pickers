@@ -302,7 +302,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                         '<md-icon md-svg-icon="mdp-access-time"></md-icon>' +
                     '</md-button>' +
                     '<md-input-container' + (noFloat ? ' md-no-float' : '') + ' md-is-error="isError()">' +
-                        '<input name="{{ inputName }}" ng-model="model.$viewValue" ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
+                        '<input name="{{ inputName }}" ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
                     '</md-input-container>' +
                 '</div>';
         },
@@ -423,8 +423,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                     updateInputElement(strValue);
                     ngModel.$setViewValue(strValue);
                 } else {
-                    updateInputElement(time);
-                    ngModel.$setViewValue(time);
+                    updateInputElement(ngModel.$viewValue);
                 }
 
                 if(!ngModel.$pristine &&
@@ -443,7 +442,8 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                     cancelLabel: scope.cancelLabel,
                     autoSwitch: scope.autoSwitch,
                     ampm: scope.ampm
-                }).then(function(time) {
+                }).then(function(time)
+                {
                     updateTime(time, true);
                 }, function (error) {
                     if (opts.clearOnCancel) {
@@ -453,11 +453,11 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             };
 
             function onInputElementEvents(event) {
-                if(event.target.value !== ngModel.$viewVaue)
+                if(event.target.value !== ngModel.$viewValue)
                     updateTime(event.target.value);
             }
 
-            inputElement.on("reset input blur", onInputElementEvents);
+            inputElement.bind("blur", onInputElementEvents);
 
             scope.$on("$destroy", function() {
                 inputElement.off("reset input blur", onInputElementEvents);
