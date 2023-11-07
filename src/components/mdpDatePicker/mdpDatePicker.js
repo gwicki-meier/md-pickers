@@ -480,8 +480,8 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 }
 
                 function updateDate(date) {
-                    var value = moment(date, angular.isDate(date) ? null : scope.dateFormat, true),
-                        strValue = value.format(scope.dateFormat);
+                    var value = moment(date, scope.dateFormat);
+                    var strValue = value.format(scope.dateFormat);
 
                     if(value.isValid()) {
                         updateInputElement(strValue);
