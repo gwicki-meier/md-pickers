@@ -10,4 +10,6 @@ require('angular-material');
 
 require ('./dist/mdPickers');
 
+require ('moment');
+
 module.exports = 'mdPickers';

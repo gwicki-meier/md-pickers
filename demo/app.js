@@ -35,5 +35,7 @@ angular.module('demo', [
         $mdpLocale.date.noFloat = true;
         $mdpLocale.date.openOnClick = false;
         $mdpLocale.date.clearOnCancel = false;
+
+        $mdpLocale.moment.locale = "de-ch";
     }
 }]);

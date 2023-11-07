@@ -54,9 +54,9 @@ function buildDemoJs(){
 function buildDemoHtml(){
     return gulp.src(['demo/*.html'])
         .pipe(htmlreplace({
-            'css': '../dist/mdPickers.min.css',
-            'js': '../dist/mdPickers.min.js',
-            'demojs': 'demo.min.js'
+            'css': '../dist/mdPickers.css',
+            'js': '../dist/mdPickers.js',
+            'demojs': 'demo.js'
         }))
         .pipe(gulp.dest(demoOutputFolder));
 }
