@@ -416,8 +416,8 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             }
 
             function updateTime(time) {
-                var value = moment(time, angular.isDate(time) ? null : scope.timeFormat, true),
-                    strValue = value.format(scope.timeFormat);
+                var value = moment(time, scope.timeFormat);
+                var strValue = value.format(scope.timeFormat);
 
                 if(value.isValid()) {
                     updateInputElement(strValue);
