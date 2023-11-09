@@ -457,7 +457,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         '<md-icon md-svg-icon="mdp-event"></md-icon>' +
                     '</md-button>' +
                     '<md-input-container' + (noFloat ? ' md-no-float' : '') + ' md-is-error="isError()">' +
-                        '<input name="{{ inputName }}"  ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
+                        '<input size="10" name="{{ inputName }}"  ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
                     '</md-input-container>' +
                 '</div>';
         },
@@ -991,7 +991,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                         '<md-icon md-svg-icon="mdp-access-time"></md-icon>' +
                     '</md-button>' +
                     '<md-input-container' + (noFloat ? ' md-no-float' : '') + ' md-is-error="isError()">' +
-                        '<input name="{{ inputName }}" ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
+                        '<input size="5" name="{{ inputName }}" ng-required="required()" type="{{ ::type }}"' + (angular.isDefined(attrs.mdpDisabled) ? ' ng-disabled="disabled"' : '') + ' aria-label="{{placeholder}}" placeholder="{{placeholder}}"' + (openOnClick ? ' ng-click="showPicker($event)" ' : '') + ' />' +
                     '</md-input-container>' +
                 '</div>';
         },
