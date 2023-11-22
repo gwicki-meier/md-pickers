@@ -2,8 +2,6 @@
  * Created by Robin Thoni on 6/21/17.
  */
 
-import moment from "moment";
-
 
 /*@ngInject*/
 export default function DemoController($scope, $mdpDatePicker, $mdpTimePicker) {

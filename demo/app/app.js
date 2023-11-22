@@ -9,14 +9,12 @@ import angular from 'angular';
 import ngMaterial from 'angular-material';
 
 import ngMessages from "angular-messages"
-import moment from "moment";
-import "moment/locale/de-ch";
-import "moment/locale/fr-ch";
-import "moment/locale/it-ch";
+import moment from "moment/min/moment-with-locales";
 import mdPickers from 'md-pickers';
-import demoService from "./demoService";
+import DemoController from "./demoController";
 
 window.moment = moment;
+
 
 export default angular.module("demo", [
     ngMaterial,
@@ -26,8 +24,6 @@ export default angular.module("demo", [
     .config(['$mdThemingProvider', function ($mdThemingProvider) {
         $mdThemingProvider.theme('dark').dark();
     }])
-    .service("demoService", demoService)
-
     .run(['$location', '$mdpLocale', function ($location, $mdpLocale) {
         if (location.search !== '?useDefaults') { // Quick and dirty
             $mdpLocale.time.minTime = "00:00";
@@ -40,15 +36,18 @@ export default angular.module("demo", [
             $mdpLocale.time.clearOnCancel = false;
 
 
-            $mdpLocale.date.dateFormat = "DD.MM.YYYY";
-            $mdpLocale.date.displayFormat = "ll";
+            $mdpLocale.date.dateFormat = "L";
+            $mdpLocale.date.displayFormat = "ddd DD MMM";
             $mdpLocale.date.noFloat = true;
             $mdpLocale.date.openOnClick = false;
             $mdpLocale.date.clearOnCancel = false;
 
             $mdpLocale.moment.locale = "de-ch";
         }
-    }]);
+    }]
+    )
+    .controller("demoController", DemoController)
+    .name;
 
 Date.prototype.addDays = function (days) {
     var dat = new Date(this.valueOf());

@@ -6,7 +6,7 @@
     <script type="module" src="./app.js"></script>
 </head>
 <body>
-<div ng-app="demo-app" ng-controller="demoController">
+<div ng-app="demo" ng-controller="demoController">
     <md-toolbar class="md-whiteframe-z2">
         <div style="text-align: center;">
             <h1>mdPickers</h1>
@@ -19,52 +19,55 @@
         <a href="?useDefaults">Use default global settings</a>
     </div>
 
-    <div layout="column" flex>
-        <h3>Default options:</h3>
-        <div layout="row" flex>
-            <mdp-date-picker ng-model="date1" mdp-placeholder="Date 1"></mdp-date-picker>
-            <mdp-time-picker ng-model="date1" mdp-placeholder="Time 1"></mdp-time-picker>
-        </div>
-        <span>{{ date1 }}</span>
-    </div>
+    <div layout="column" layout-align="center center">
 
-    <md-content layout="column" flex md-theme="dark">
-        <h3>Dark theme:</h3>
-        <div layout="row" flex>
-            <mdp-date-picker ng-model="date4" mdp-placeholder="Date 1"></mdp-date-picker>
-            <mdp-time-picker ng-model="date4" mdp-placeholder="Time 1"></mdp-time-picker>
+        <div layout="column" flex>
+            <h3>Default options:</h3>
+            <div layout="row" flex>
+                <mdp-date-picker ng-model="date1" mdp-placeholder="Date 1"></mdp-date-picker>
+                <mdp-time-picker ng-model="date1" mdp-placeholder="Time 1"></mdp-time-picker>
+            </div>
+            <span>{{ date1 }}</span>
         </div>
-        <span>{{ date4 }}</span>
-    </md-content>
 
-    <div layout="column" flex>
-        <h3>HTML options:</h3>
-        <div layout="row" flex>
-            <mdp-date-picker
-                    ng-model="date2"
-                    mdp-placeholder="Date 2"
-                    mdp-min-date="minDate2"
-                    mdp-max-date="maxDate2"
-                    mdp-ok-label="go"
-                    mdp-cancel-label="back"
-                    mdp-date-filter="dateFilter2"
-                    mdp-format="MM-DD-YYYY"
-                    mdp-clear-on-cancel="false"
-            ></mdp-date-picker>
-            <mdp-time-picker
-                    ng-model="date2"
-                    mdp-placeholder="Time 2"
-                    mdp-min-time="minTime2"
-                    mdp-max-time="maxTime2"
-                    mdp-ok-label="go"
-                    mdp-cancel-label="back"
-                    mdp-format="HH:mm"
-                    mdp-auto-switch="false"
-                    mdp-ampm="false"
-                    mdp-clear-on-cancel="false"
-            ></mdp-time-picker>
+        <md-content layout="column" flex md-theme="dark">
+            <h3>Dark theme:</h3>
+            <div layout="row" flex>
+                <mdp-date-picker ng-model="date4" mdp-placeholder="Date 1"></mdp-date-picker>
+                <mdp-time-picker ng-model="date4" mdp-placeholder="Time 1"></mdp-time-picker>
+            </div>
+            <span>{{ date4 }}</span>
+        </md-content>
+
+        <div layout="column" flex>
+            <h3>HTML options:</h3>
+            <div layout="row" flex>
+                <mdp-date-picker
+                        ng-model="date2"
+                        mdp-placeholder="Date 2"
+                        mdp-min-date="minDate2"
+                        mdp-max-date="maxDate2"
+                        mdp-ok-label="go"
+                        mdp-cancel-label="back"
+                        mdp-date-filter="dateFilter2"
+                        mdp-format="MM-DD-YYYY"
+                        mdp-clear-on-cancel="false"
+                ></mdp-date-picker>
+                <mdp-time-picker
+                        ng-model="date2"
+                        mdp-placeholder="Time 2"
+                        mdp-min-time="minTime2"
+                        mdp-max-time="maxTime2"
+                        mdp-ok-label="go"
+                        mdp-cancel-label="back"
+                        mdp-format="HH:mm"
+                        mdp-auto-switch="false"
+                        mdp-ampm="false"
+                        mdp-clear-on-cancel="false"
+                ></mdp-time-picker>
+            </div>
+            <span>{{ date2 }}</span>
         </div>
-        <span>{{ date2 }}</span>
     </div>
     <div layout="column" flex>
         <h3>Custom options:</h3>
