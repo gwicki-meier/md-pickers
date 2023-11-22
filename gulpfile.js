@@ -39,33 +39,9 @@ function buildApp() {
         .pipe(gulp.dest(outputFolder));
 }
 
-function buildDemoJs(){
-    return gulp.src(['demo/*.js'])
-        .pipe(concat('demo.js'))
-        .pipe(wrap('(function() {\n"use strict";\n<%= contents %>\n})();'))
-        .pipe(sourcemaps.init())
-        .pipe(gulp.dest(demoOutputFolder))
-        .pipe(rename({suffix: '.min'}))
-        .pipe(uglify())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(demoOutputFolder));
-}
-
-function buildDemoHtml(){
-    return gulp.src(['demo/*.html'])
-        .pipe(htmlreplace({
-            'css': '../dist/mdPickers.css',
-            'js': '../dist/mdPickers.js',
-            'demojs': 'demo.js'
-        }))
-        .pipe(gulp.dest(demoOutputFolder));
-}
-
 const watch = () => gulp.watch('src/**/*', gulp.series(assets, buildApp));
 exports.watch = watch;
 
 const dev = gulp.series(assets, buildApp);
 exports.default = dev;
 
-const demo = gulp.series(assets, buildApp, buildDemoJs, buildDemoHtml);
-exports.demo = demo;

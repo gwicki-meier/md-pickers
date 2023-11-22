@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "angular"
+  ],
+  "parser": "@babel/eslint-parser",
+  "settings": {
+    "import/ignore": [
+      "node_modules",
+      "\\.tpl\\.html$"
+    ]
+  },
+  "globals": {
+    "FileReader": true
+  },
+  "env": {
+    "es6": true
+  }
+}

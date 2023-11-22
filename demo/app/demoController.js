@@ -2,7 +2,12 @@
  * Created by Robin Thoni on 6/21/17.
  */
 
-angular.module('demo').controller('demoController', ['$scope', "$mdpDatePicker", "$mdpTimePicker", function($scope, $mdpDatePicker, $mdpTimePicker) {
+import moment from "moment";
+
+
+/*@ngInject*/
+export default function DemoController($scope, $mdpDatePicker, $mdpTimePicker) {
+
     $scope.date1 = null;
 
     $scope.date2 = null;
@@ -78,5 +83,4 @@ angular.module('demo').controller('demoController', ['$scope', "$mdpDatePicker",
             };
         }
     });
-
-}]);
+};
