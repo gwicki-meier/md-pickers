@@ -1,3 +1,15 @@
+### 1.2.0
+
+#### Bugfix
+
+* Fix some issues with the time zone.
+* Manual inputs are only written to ng-model if element is blurred
+* Set Angular Dependencies to 1.5.8
+
+#### Features
+
+* "Moment locale" can be set with Angular variables.
+
 ### 1.1.5
 
 #### Bugfixes
