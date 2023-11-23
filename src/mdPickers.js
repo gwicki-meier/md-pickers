@@ -1,4 +1,4 @@
-/* global moment, angular */
+/* global dayjs, angular */
 
 var module = angular.module("mdPickers", [
     "ngMaterial",

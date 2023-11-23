@@ -1,11 +1,11 @@
-/* global moment, angular */
+/* global dayjs, angular */
 
 function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia) {
     var self = this;
     this.VIEW_HOURS = 1;
     this.VIEW_MINUTES = 2;
     this.currentView = this.VIEW_HOURS;
-    this.time = moment(time);
+    this.time = dayjs(time);
     this.autoSwitch = !!autoSwitch;
     this.ampm = !!ampm;
 
@@ -22,13 +22,13 @@ function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia) {
     };
 
     this.setAM = function() {
-        if(self.time.hours() >= 12)
-            self.time.hour(self.time.hour() - 12);
+        if(self.time.hour() >= 12)
+            self.time = self.time.hour(self.time.hour() - 12);
     };
 
     this.setPM = function() {
-        if(self.time.hours() < 12)
-            self.time.hour(self.time.hour() + 12);
+        if(self.time.hour() < 12)
+            self.time = self.time.hour(self.time.hour() + 12);
     };
 
     this.cancel = function() {
@@ -65,7 +65,7 @@ function ClockCtrl($scope) {
                 for(var i = f; i <= t; i+=f)
                     self.steps.push(i);
                 if (!self.ampm) self.steps.push(0);
-                self.selected = self.time.hours() || 0;
+                self.selected = self.time.hour() || 0;
                 if(self.ampm && self.selected > 12) self.selected -= 12;
 
                 break;
@@ -73,7 +73,7 @@ function ClockCtrl($scope) {
                 for(var i = 5; i <= 55; i+=5)
                     self.steps.push(i);
                 self.steps.push(0);
-                self.selected = self.time.minutes() || 0;
+                self.selected = self.time.minute() || 0;
 
                 break;
         }
@@ -121,12 +121,12 @@ function ClockCtrl($scope) {
 
         switch(self.type) {
             case TYPE_HOURS:
-                if(self.ampm && self.time.format("A") == "PM") time += 12;
-                this.time.hours(time);
+                if(self.ampm && self.time.format("A") === "PM") time += 12;
+                this.time = this.time.hour(time);
                 break;
             case TYPE_MINUTES:
                 if(time > 59) time -= 60;
-                this.time.minutes(time);
+                this.time = this.time.minute(time);
                 break;
         }
 
@@ -208,11 +208,7 @@ module.provider("$mdpTimePicker", function() {
     };
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
-        moment.updateLocale($mdpLocale.moment.locale, {
-            week: {
-                dow: 1
-            }
-        });
+        dayjs.locale($mdpLocale.advanced.locale || 'en');
         return function (time, options) {
             if (!angular.isDate(time)) time = Date.now();
             if (!angular.isObject(options)) options = {};
@@ -234,8 +230,8 @@ module.provider("$mdpTimePicker", function() {
                     '</div>' +
                     '<div layout="column" ng-show="timepicker.ampm" class="mdp-timepicker-selected-ampm">' +
 
-                    '<span ng-click="timepicker.setAM()" ng-class="{ \'active\': timepicker.time.hours() < 12 }">AM</span>' +
-                    '<span ng-click="timepicker.setPM()" ng-class="{ \'active\': timepicker.time.hours() >= 12 }">PM</span>' +
+                    '<span ng-click="timepicker.setAM()" ng-class="{ \'active\': timepicker.time.hour() < 12 }">AM</span>' +
+                    '<span ng-click="timepicker.setPM()" ng-class="{ \'active\': timepicker.time.hour() >= 12 }">PM</span>' +
                     '</div>' +
 
                     '</md-toolbar>' +
@@ -269,10 +265,10 @@ module.provider("$mdpTimePicker", function() {
 function compareTimeValidator(value, format, otherTime, comparator) {
     // take only the date part, not the time part
     if (angular.isDate(otherTime)) {
-        otherTime = moment(otherTime).format(format);
+        otherTime = dayjs(otherTime).format(format);
     }
-    otherTime = moment(otherTime, format, true);
-    var date = angular.isDate(value) ? moment(value) :  moment(value, format, true);
+    otherTime = dayjs(otherTime, format, true);
+    var date = angular.isDate(value) ? dayjs(value) :  dayjs(value, format, true);
 
     return !value ||
             angular.isDate(value) ||
@@ -318,7 +314,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             "ampm": "=?mdpAmpm",
             "inputName": "@?mdpInputName",
             "clearOnCancel": "=?mdpClearOnCancel",
-            "momentLocale": "@?mdpMomentLocale"
+            "locale": "@?mdpAdvandecLocale"
         },
         link: function(scope, element, attrs, controllers, $transclude) {
             var ngModel = controllers[0];
@@ -365,7 +361,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
 
             // update input element if model has changed
             ngModel.$formatters.unshift(function(value) {
-                var time = angular.isDate(value) && moment(value);
+                var time = angular.isDate(value) && dayjs(value);
                 if(time && time.isValid()) {
                     var strVal = time.format(scope.timeFormat);
                     updateInputElement(strVal);
@@ -377,7 +373,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             });
 
             ngModel.$validators.format = function(modelValue, viewValue) {
-                return !viewValue || angular.isDate(viewValue) || moment(viewValue, scope.timeFormat, true).isValid();
+                return !viewValue || angular.isDate(viewValue) || dayjs(viewValue, scope.timeFormat, true).isValid();
             };
 
             ngModel.$validators.required = function(modelValue, viewValue) {
@@ -393,13 +389,13 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             };
 
             ngModel.$parsers.unshift(function(value) {
-                var parsed = moment(value, scope.timeFormat, true);
+                var parsed = dayjs(value, scope.timeFormat, true);
                 if(parsed.isValid()) {
                     if(angular.isDate(ngModel.$modelValue)) {
-                        var originalModel = moment(ngModel.$modelValue);
-                        originalModel.minutes(parsed.minutes());
-                        originalModel.hours(parsed.hours());
-                        originalModel.seconds(parsed.seconds());
+                        var originalModel = dayjs(ngModel.$modelValue);
+                        originalModel = originalModel.minute(parsed.minute());
+                        originalModel = originalModel.hour(parsed.hour());
+                        originalModel = originalModel.second(parsed.second());
 
                         parsed = originalModel;
                     }
@@ -416,7 +412,12 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             }
 
             function updateTime(time) {
-                var value = moment(time, scope.timeFormat);
+                var value = null;
+                if (!angular.isDate(time)) {
+                    value = dayjs(time, scope.timeFormat);
+                } else {
+                    value = dayjs(time);
+                }
                 var strValue = value.format(scope.timeFormat);
 
                 if(value.isValid()) {
@@ -492,7 +493,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", function($mdpTi
                     cancelLabel: scope.cancelLabel,
                     ampm: scope.ampm
                 }).then(function(time) {
-                    ngModel.$setViewValue(moment(time).format(scope.format));
+                    ngModel.$setViewValue(dayjs(time).format(scope.format));
                     ngModel.$render();
                 });
             };

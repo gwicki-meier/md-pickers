@@ -1,11 +1,11 @@
-/* global moment, angular */
+/* global dayjs, angular */
 
 function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, options) {
     var self = this;
 
-    this.date = moment(currentDate);
-    this.minDate = options.minDate && moment(options.minDate).isValid() ? moment(options.minDate) : null;
-    this.maxDate = options.maxDate && moment(options.maxDate).isValid() ? moment(options.maxDate) : null;
+    this.date = dayjs(currentDate);
+    this.minDate = options.minDate && dayjs(options.minDate).isValid() ? dayjs(options.minDate) : null;
+    this.maxDate = options.maxDate && dayjs(options.maxDate).isValid() ? dayjs(options.maxDate) : null;
     this.displayFormat = options.displayFormat || "ddd, MMM DD";
     this.dateFilter = angular.isFunction(options.dateFilter) ? options.dateFilter : null;
     this.selectingYear = false;
@@ -13,19 +13,19 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     // validate min and max date
     if (this.minDate && this.maxDate) {
         if (this.maxDate.isBefore(this.minDate)) {
-            this.maxDate = moment(this.minDate).add(1, 'days');
+            this.maxDate = dayjs(this.minDate).add(1, 'days');
         }
     }
 
     if (this.date) {
         // check min date
         if (this.minDate && this.date.isBefore(this.minDate)) {
-            this.date = moment(this.minDate);
+            this.date = dayjs(this.minDate);
         }
 
         // check max date
         if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            this.date = moment(this.maxDate);
+            this.date = dayjs(this.maxDate);
         }
     }
 
@@ -52,7 +52,7 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     $scope.year = this.date.year();
 
     this.selectYear = function(year) {
-        self.date.year(year);
+        self.date = self.date.year(year);
         $scope.year = year;
         self.selectingYear = false;
         self.animate();
@@ -77,11 +77,11 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
         var date = this.date;
 
         if (this.minDate && this.date.isBefore(this.minDate)) {
-            date = moment(this.minDate);
+            date = dayjs(this.minDate);
         }
 
         if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            date = moment(this.maxDate);
+            date = dayjs(this.maxDate);
         }
 
         $mdDialog.hide(date.toDate());
@@ -120,11 +120,7 @@ module.provider("$mdpDatePicker", function() {
     };
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
-        moment.updateLocale($mdpLocale.moment.locale, {
-            week: {
-                dow: 1
-            }
-        });
+        dayjs.locale($mdpLocale.advanced.locale || 'en');
         return function (currentDate, options) {
             if (!angular.isDate(currentDate)) currentDate = Date.now();
             if (!angular.isObject(options)) options = {};
@@ -183,10 +179,10 @@ function CalendarCtrl($scope) {
 
     this.$onInit = function () {
         self.daysInMonth = [];
-        self.dow = moment.localeData().firstDayOfWeek();
+        self.dow = dayjs.localeData().firstDayOfWeek();
         self.weekDays = [].concat(
-            moment.weekdaysMin().slice(self.dow),
-            moment.weekdaysMin().slice(0, self.dow)
+            dayjs.weekdaysMin().slice(self.dow),
+            dayjs.weekdaysMin().slice(0, self.dow)
         );
         $scope.$watch(function () {
             return self.date.unix()
@@ -199,7 +195,7 @@ function CalendarCtrl($scope) {
 
     this.getDaysInMonth = function() {
         var days = self.date.daysInMonth(),
-            firstDay = moment(self.date).date(1).day() - this.dow;
+            firstDay = self.date.date(1).day() - this.dow;
 
         if(firstDay < 0) firstDay = this.weekDays.length - 1;
 
@@ -209,7 +205,7 @@ function CalendarCtrl($scope) {
             if(i > firstDay) {
                 day =  {
                     value: (i - firstDay),
-                    enabled: self.isDayEnabled(moment(self.date).date(i - firstDay).toDate())
+                    enabled: self.isDayEnabled(self.date.date(i - firstDay).toDate())
                 };
             }
             arr.push(day);
@@ -227,15 +223,15 @@ function CalendarCtrl($scope) {
     };
 
     this.selectDate = function(dom) {
-        self.date.date(dom);
+        self.date = self.date.date(dom);
     };
 
     this.nextMonth = function() {
-        self.date.add(1, 'months');
+        self.date = self.date.add(1, 'months');
     };
 
     this.prevMonth = function() {
-        self.date.subtract(1, 'months');
+        self.date = self.date.subtract(1, 'months');
     };
 
     this.updateDaysInMonth = function() {
@@ -307,16 +303,16 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
 }]);
 
 function formatValidator(value, format) {
-    return !value || angular.isDate(value) || moment(value, format, true).isValid();
+    return !value || angular.isDate(value) || dayjs(value, format, true).isValid();
 }
 
 function compareDateValidator(value, format, otherDate, comparator) {
     // take only the date part, not the time part
     if (angular.isDate(otherDate)) {
-        otherDate = moment(otherDate).format(format);
+        otherDate = dayjs(otherDate).format(format);
     }
-    otherDate = moment(otherDate, format, true);
-    var date = angular.isDate(value) ? moment(value) :  moment(value, format, true);
+    otherDate = dayjs(otherDate, format, true);
+    var date = angular.isDate(value) ? dayjs(value) :  dayjs(value, format, true);
 
     return !value ||
             angular.isDate(value) ||
@@ -333,7 +329,7 @@ function maxDateValidator(value, format, maxDate) {
 }
 
 function filterValidator(value, format, filter) {
-    var date = angular.isDate(value) ? moment(value) :  moment(value, format, true);
+    var date = angular.isDate(value) ? dayjs(value) :  dayjs(value, format, true);
 
     return !value ||
             angular.isDate(value) ||
@@ -376,7 +372,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
             "disabled": "=?mdpDisabled",
             "inputName": "@?mdpInputName",
             "clearOnCancel": "=?mdpClearOnCancel",
-            "momentLocale": "@?mdpMomentLocale"
+            "locale": "@?mdpAdvancedLocale"
         },
         link: {
             pre: function(scope, element, attrs, constollers, $transclude) {
@@ -425,7 +421,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
-                    var date = angular.isDate(value) && moment(value);
+                    var date = angular.isDate(value) && dayjs(value);
                     if(date && date.isValid()) {
                         var strVal = date.format(scope.dateFormat);
                         updateInputElement(strVal);
@@ -457,13 +453,13 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 };
 
                 ngModel.$parsers.unshift(function(value) {
-                    var parsed = moment(value, scope.dateFormat, true);
+                    var parsed = dayjs(value, scope.dateFormat, true);
                     if(parsed.isValid()) {
                         if(angular.isDate(ngModel.$modelValue)) {
-                            var originalModel = moment(ngModel.$modelValue);
-                            originalModel.year(parsed.year());
-                            originalModel.month(parsed.month());
-                            originalModel.date(parsed.date());
+                            var originalModel = dayjs(ngModel.$modelValue);
+                            originalModel = originalModel.year(parsed.year());
+                            originalModel = originalModel.month(parsed.month());
+                            originalModel = originalModel.date(parsed.date());
 
                             parsed = originalModel;
                         }
@@ -480,7 +476,12 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 }
 
                 function updateDate(date) {
-                    var value = moment(date, scope.dateFormat);
+                    var value = null;
+                    if (!angular.isDate(date)) {
+                        value = dayjs(date, scope.dateFormat);
+                    } else {
+                        value = dayjs(date);
+                    }
                     var strValue = value.format(scope.dateFormat);
 
                     if(value.isValid()) {
@@ -576,7 +577,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", function($mdpDa
                     cancelLabel: scope.cancelLabel,
                     targetEvent: ev
                 }).then(function(time) {
-                    ngModel.$setViewValue(moment(time).format(scope.format));
+                    ngModel.$setViewValue(dayjs(time).format(scope.format));
                     ngModel.$render();
                 });
             };

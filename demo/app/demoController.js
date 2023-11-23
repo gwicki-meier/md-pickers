@@ -4,7 +4,7 @@
 
 
 /*@ngInject*/
-export default function DemoController($scope, $mdpDatePicker, $mdpTimePicker) {
+export default function DemoController($scope, $window, $mdpDatePicker, $mdpTimePicker) {
 
     $scope.date1 = null;
 
@@ -29,8 +29,8 @@ export default function DemoController($scope, $mdpDatePicker, $mdpTimePicker) {
     $scope.custom.cancelLabel3 = "cancel!";
     $scope.custom.clearOnCancel3 = true;
     $scope.custom.dateFormat3 = "DD-MM-YYYY";
-    $scope.custom.minDateStr3 = moment(new Date().addDays(-7)).format($scope.custom.dateFormat3);
-    $scope.custom.maxDateStr3 = moment(new Date().addDays(7)).format($scope.custom.dateFormat3);
+    $scope.custom.minDateStr3 = dayjs(new Date().addDays(-7)).format($scope.custom.dateFormat3);
+    $scope.custom.maxDateStr3 = dayjs(new Date().addDays(7)).format($scope.custom.dateFormat3);
     $scope.custom.maxDate3 = new Date().addDays(7);
     $scope.custom.dateFilterEnabled3 = false;
     $scope.custom.dateFilterNo3 = false;
@@ -61,10 +61,10 @@ export default function DemoController($scope, $mdpDatePicker, $mdpTimePicker) {
     };
 
     $scope.$watch('custom.minDateStr3', function(newValue, oldValue) {
-        $scope.custom.minDate3 = moment(newValue, $scope.custom.dateFormat3, true);
+        $scope.custom.minDate3 = dayjs(newValue, $scope.custom.dateFormat3, true);
     });
     $scope.$watch('custom.maxDateStr3', function(newValue, oldValue) {
-        $scope.custom.maxDate3 = moment(newValue, $scope.custom.dateFormat3, true);
+        $scope.custom.maxDate3 = dayjs(newValue, $scope.custom.dateFormat3, true);
     });
 
     $scope.$watch('custom.dateFilterNo3', function (newValue, oldValue) {

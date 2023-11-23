@@ -28,7 +28,7 @@ module.factory('$mdpLocale', [function () {
             openOnClick: false,
             clearOnCancel: false
         },
-        moment: {
+        advanced: {
             locale: "en"
         }
     };

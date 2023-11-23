@@ -1,7 +1,7 @@
 {
   "name": "md-pickers-demo",
   "version": "1.2.0",
-  "description": "Material Design date/time pickers built with Angular Material and Moment.js",
+  "description": "Material Design date/time pickers built with Angular Material and day.js",
   "main": "index.js",
   "scripts": {
     "demo": "vite serve"
@@ -34,8 +34,8 @@
     "angular-aria": "1.5.8",
     "angular-material": "1.1.9",
     "angular-messages": "1.5.8",
+    "dayjs": "^1.11.10",
     "md-pickers": "file:..",
-    "moment": "^2.29.4",
     "vite-plugin-commonjs": "^0.10.1"
   },
   "devDependencies": {
