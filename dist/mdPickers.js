@@ -576,7 +576,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 function updateDate(date) {
                     var value = null;
                     if (!angular.isDate(date)) {
-                        value = dayjs(date, scope.dateFormat);
+                        value = dayjs(date, scope.dateFormat, true);
                     } else {
                         value = dayjs(date);
                     }
@@ -1104,7 +1104,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             function updateTime(time) {
                 var value = null;
                 if (!angular.isDate(time)) {
-                    value = dayjs(time, scope.timeFormat);
+                    value = dayjs(time, scope.timeFormat, true);
                 } else {
                     value = dayjs(time);
                 }
