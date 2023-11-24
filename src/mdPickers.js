@@ -1,5 +1,6 @@
 /* global dayjs, angular */
 
+
 var module = angular.module("mdPickers", [
     "ngMaterial",
     "ngAnimate",
@@ -17,3 +18,11 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
         $templateCache.put(icon.url, icon.svg);
     });
 }]);
+
+var currentLocale = "en";
+
+function setCurrentLocale(locale) {
+    if (currentLocale !== locale) {
+        currentLocale = locale;
+    }
+}

@@ -12,13 +12,11 @@ require ('./dist/mdPickers');
 
 // Dayjs
 const dayjs = require('dayjs')
-var updateLocale = require('dayjs/plugin/updateLocale');
 var localeData = require('dayjs/plugin/localeData');
 var localizedFormat = require('dayjs/plugin/localizedFormat');
 var customParseFormat = require('dayjs/plugin/customParseFormat');
 var isSameOrAfter = require('dayjs/plugin/isSameOrAfter');
 var isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
-dayjs.extend(updateLocale);
 dayjs.extend(localeData);
 dayjs.extend(localizedFormat);
 dayjs.extend(customParseFormat);

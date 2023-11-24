@@ -11,10 +11,10 @@ import ngMessages from "angular-messages";
 import demo from "./demo";
 
 import dayjs from "dayjs";
-import locale_de from 'dayjs/locale/de';
-import locale_dech from 'dayjs/locale/de-ch';
-import locale_frch from 'dayjs/locale/fr-ch';
-import locale_itch from 'dayjs/locale/it-ch';
+import * as locale_de from 'dayjs/locale/de';
+import * as locale_dech from 'dayjs/locale/de-ch';
+import * as locale_frch from 'dayjs/locale/fr-ch';
+import * as locale_itch from 'dayjs/locale/it-ch';
 
 
 export default angular.module("demoApp", [
