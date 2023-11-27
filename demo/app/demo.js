@@ -26,8 +26,6 @@ export default angular.module("demo", [
                 $mdpLocale.date.noFloat = true;
                 $mdpLocale.date.openOnClick = false;
                 $mdpLocale.date.clearOnCancel = false;
-
-                $mdpLocale.advanced.locale = "de-ch";
             }
         }]
     )

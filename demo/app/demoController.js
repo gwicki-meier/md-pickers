@@ -6,7 +6,11 @@
 /*@ngInject*/
 export default function DemoController($scope, $window, $mdpDatePicker, $mdpTimePicker) {
 
+    $scope.settings1 = {timezone: "Europe/Zurich", locale: "de-ch"};
+
     $scope.date1 = null;
+
+    $scope.settings2 = {timezone: "Europe/London", locale: "de-ch"};
 
     $scope.date2 = null;
     $scope.minDate2 = new Date().addDays(-7);

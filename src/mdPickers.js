@@ -19,10 +19,38 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
     });
 }]);
 
-var currentLocale = "en";
 
-function setCurrentLocale(locale) {
-    if (currentLocale !== locale) {
-        currentLocale = locale;
+function setCurrentSettingsToScope(scope) {
+    var settings = scope.settings = {};
+    var localTZ = dayjs.tz.guess();
+
+    if (angular.isDefined(scope.advancedSettings)) {
+
+        var advancedSettings = scope.advancedSettings;
+        if (advancedSettings.locale) {
+            scope.currentLocale = advancedSettings.locale;
+            settings.locale = scope.currentLocale;
+        } else {
+            scope.currentLocale = "en";
+            settings.locale = "en";
+        }
+        if (advancedSettings.timezone === "local") {
+            scope.currentTZ = localTZ;
+            settings.timezone = scope.currentTZ;
+        } else if (advancedSettings.timezone !== localTZ) {
+            scope.currentTZ = advancedSettings.timezone;
+            settings.timezone = scope.currentTZ;
+
+        } else {
+            scope.currentTZ = localTZ;
+            settings.timezone = scope.currentTZ;
+        }
+
+    } else {
+        settings.locale = "en";
+        settings.timezone = localTZ;
+        scope.settings = settings;
+        scope.currentTZ = settings.timezone
+        scope.currentLocale = settings.locale
     }
 }

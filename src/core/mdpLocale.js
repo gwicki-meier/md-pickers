@@ -27,9 +27,6 @@ module.factory('$mdpLocale', [function () {
             noFloat: true,
             openOnClick: false,
             clearOnCancel: false
-        },
-        advanced: {
-            locale: "en"
         }
     };
 }]);
