@@ -21,36 +21,27 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 
 
 function setCurrentSettingsToScope(scope) {
-    var settings = scope.settings = {};
-    var localTZ = dayjs.tz.guess();
+    var settings = scope.settings;
 
-    if (angular.isDefined(scope.advancedSettings)) {
-
-        var advancedSettings = scope.advancedSettings;
-        if (advancedSettings.locale) {
-            scope.currentLocale = advancedSettings.locale;
-            settings.locale = scope.currentLocale;
+    if (angular.isDefined(scope.mdpSettings)) {
+        var mdpSettings = scope.mdpSettings;
+        if (mdpSettings.locale) {
+            settings.currentLocale = mdpSettings.locale;
         } else {
-            scope.currentLocale = "en";
-            settings.locale = "en";
+            settings.currentLocale = "en";
         }
-        if (advancedSettings.timezone === "local") {
-            scope.currentTZ = localTZ;
-            settings.timezone = scope.currentTZ;
-        } else if (advancedSettings.timezone !== localTZ) {
-            scope.currentTZ = advancedSettings.timezone;
-            settings.timezone = scope.currentTZ;
 
-        } else {
-            scope.currentTZ = localTZ;
-            settings.timezone = scope.currentTZ;
+        // If "local", use timezone from Browser
+        if (angular.isDefined(mdpSettings.timezone)) {
+            settings.timezone = mdpSettings.timezone;
+            settings.overrideTimezone = true;
         }
+
+        settings.dateType = mdpSettings.dateType;
 
     } else {
-        settings.locale = "en";
-        settings.timezone = localTZ;
-        scope.settings = settings;
-        scope.currentTZ = settings.timezone
-        scope.currentLocale = settings.locale
+        settings.currentLocale = "en";
+        settings.overrideTimezone = false;
+        settings.dateType = "date";
     }
 }

@@ -23,37 +23,28 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 
 
 function setCurrentSettingsToScope(scope) {
-    var settings = scope.settings = {};
-    var localTZ = dayjs.tz.guess();
+    var settings = scope.settings;
 
-    if (angular.isDefined(scope.advancedSettings)) {
-
-        var advancedSettings = scope.advancedSettings;
-        if (advancedSettings.locale) {
-            scope.currentLocale = advancedSettings.locale;
-            settings.locale = scope.currentLocale;
+    if (angular.isDefined(scope.mdpSettings)) {
+        var mdpSettings = scope.mdpSettings;
+        if (mdpSettings.locale) {
+            settings.currentLocale = mdpSettings.locale;
         } else {
-            scope.currentLocale = "en";
-            settings.locale = "en";
+            settings.currentLocale = "en";
         }
-        if (advancedSettings.timezone === "local") {
-            scope.currentTZ = localTZ;
-            settings.timezone = scope.currentTZ;
-        } else if (advancedSettings.timezone !== localTZ) {
-            scope.currentTZ = advancedSettings.timezone;
-            settings.timezone = scope.currentTZ;
 
-        } else {
-            scope.currentTZ = localTZ;
-            settings.timezone = scope.currentTZ;
+        // If "local", use timezone from Browser
+        if (angular.isDefined(mdpSettings.timezone)) {
+            settings.timezone = mdpSettings.timezone;
+            settings.overrideTimezone = true;
         }
+
+        settings.dateType = mdpSettings.dateType;
 
     } else {
-        settings.locale = "en";
-        settings.timezone = localTZ;
-        scope.settings = settings;
-        scope.currentTZ = settings.timezone
-        scope.currentLocale = settings.locale
+        settings.currentLocale = "en";
+        settings.overrideTimezone = false;
+        settings.dateType = "date";
     }
 }
 module.constant("mdpIconsRegistry", [
@@ -136,12 +127,10 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     var self = this;
 
     var settings = options.settings;
-    $scope.currentTZ = settings.timezone;
-    $scope.currentLocale = settings.locale;
 
-    this.date = dayjs(currentDate).tz($scope.currentTZ).locale($scope.currentLocale);
-    this.minDate = options.minDate && dayjs(options.minDate).tz($scope.currentTZ).locale($scope.currentLocale).isValid() ? dayjs(options.minDate).tz($scope.currentTZ).locale($scope.currentLocale) : null;
-    this.maxDate = options.maxDate && dayjs(options.maxDate).tz($scope.currentTZ).locale($scope.currentLocale).isValid() ? dayjs(options.maxDate).tz($scope.currentTZ).locale($scope.currentLocale) : null;
+    this.date = dayjs(currentDate);
+    this.minDate = options.minDate && dayjs(options.minDate).isValid() ? dayjs(options.minDate) : null;
+    this.maxDate = options.maxDate && dayjs(options.maxDate).isValid() ? dayjs(options.maxDate) : null;
     this.displayFormat = options.displayFormat || "ddd, MMM DD";
     this.dateFilter = angular.isFunction(options.dateFilter) ? options.dateFilter : null;
     this.selectingYear = false;
@@ -149,19 +138,19 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     // validate min and max date
     if (this.minDate && this.maxDate) {
         if (this.maxDate.isBefore(this.minDate)) {
-            this.maxDate = dayjs(this.minDate).tz($scope.currentTZ).locale($scope.currentLocale).add(1, 'days');
+            this.maxDate = dayjs(this.minDate).add(1, 'days');
         }
     }
 
     if (this.date) {
         // check min date
         if (this.minDate && this.date.isBefore(this.minDate)) {
-            this.date = dayjs(this.minDate).tz($scope.currentTZ).locale($scope.currentLocale);
+            this.date = dayjs(this.minDate);
         }
 
         // check max date
         if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            this.date = dayjs(this.maxDate).tz($scope.currentTZ).locale($scope.currentLocale);
+            this.date = dayjs(this.maxDate);
         }
     }
 
@@ -213,14 +202,14 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
         var date = this.date;
 
         if (this.minDate && this.date.isBefore(this.minDate)) {
-            date = dayjs(this.minDate).tz($scope.currentTZ).locale($scope.currentLocale);
+            date = dayjs(this.minDate);
         }
 
         if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            date = dayjs(this.maxDate).tz($scope.currentTZ).locale($scope.currentLocale);
+            date = dayjs(this.maxDate);
         }
 
-        $mdDialog.hide(date.toDate());
+        $mdDialog.hide(date);
     };
 
     this.animate = function() {
@@ -257,7 +246,18 @@ module.provider("$mdpDatePicker", function() {
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
         return function (currentDate, options) {
-            if (!angular.isDate(currentDate)) currentDate = Date.now();
+            var settings = options.settings;
+            if (!dayjs(currentDate).isValid()) {
+                currentDate = dayjs().locale(settings.currentLocale);
+                if (settings.overrideTimezone) {
+                    currentDate = currentDate.tz(settings.timezone, true);
+                } else {
+                    currentDate = currentDate.tz(dayjs.tz.guess(), true)
+                }
+            } else {
+                currentDate = dayjs(currentDate);
+            }
+
             if (!angular.isObject(options)) options = {};
 
             options.displayFormat = options.displayFormat || $mdpLocale.date.displayFormat || DISPLAY_FORMAT;
@@ -438,19 +438,19 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
 }]);
 
 function formatValidator(scope, value, format) {
-    return !value || angular.isDate(value) ||dayjs(value, format, scope.currentLocale,true).tz(scope.currentTZ).isValid();
+    return !value || dayjs(value).isValid() ||dayjs(value, format, scope.settings.currentLocale,true).isValid();
 }
 
 function compareDateValidator(scope, value, format, otherDate, comparator) {
     // take only the date part, not the time part
-    if (angular.isDate(otherDate)) {
-        otherDate = dayjs(otherDate).tz(scope.currentTZ).locale(scope.currentLocale).format(format);
+    if (dayjs(otherDate).isValid()) {
+        otherDate = dayjs(otherDate).format(format);
     }
-    otherDate = dayjs(otherDate, format, scope.currentLocale, true).tz(scope.currentTZ);
-    var date = angular.isDate(value) ? dayjs(value).tz(scope.currentTZ).locale(scope.currentLocale) :  dayjs(value, format, scope.currentLocale, true).tz(scope.currentTZ);
+    otherDate = dayjs(otherDate, format, scope.settings.currentLocale, true);
+    var date = dayjs(value).isValid() ? dayjs(value) :  dayjs(value, format, scope.settings.currentLocale, true);
 
     return !value ||
-            angular.isDate(value) ||
+            dayjs(value).isValid() ||
             !otherDate.isValid() ||
             comparator(date, otherDate);
 }
@@ -464,10 +464,10 @@ function maxDateValidator(scope, value, format, maxDate) {
 }
 
 function filterValidator(scope, value, format, filter) {
-    var date = angular.isDate(value) ? dayjs(value).tz(scope.currentTZ).locale(scope.currentLocale) :  dayjs(value, format, scope.currentLocale, true).tz(scope.currentTZ);
+    var date = dayjs(value).isValid() ? dayjs(value) :  dayjs(value, format, scope.settings.currentLocale, true);
 
     return !value ||
-            angular.isDate(value) ||
+            dayjs(value).isValid() ||
             !angular.isFunction(filter) ||
             !filter(date.toDate());
 }
@@ -507,7 +507,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
             "disabled": "=?mdpDisabled",
             "inputName": "@?mdpInputName",
             "clearOnCancel": "=?mdpClearOnCancel",
-            "advancedSettings": "=?mdpSettings"
+            "mdpSettings": "=?mdpSettings"
         },
         link: {
             pre: function(scope, element, attrs, constollers, $transclude) {
@@ -531,7 +531,6 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         return angular.isDefined(scope.clearOnCancel) ? scope.clearOnCancel : $mdpLocale.date.clearOnCancel;
                     },
                     get settings() {
-                        console.log(scope.settings)
                         return scope.settings;
                     }
                 };
@@ -564,8 +563,17 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
-                    var date = angular.isDate(value) && dayjs(value).tz(scope.currentTZ).locale(scope.currentLocale);
+                    var date = null;
+
+                    if (dayjs(value).isValid()) {
+                        date = dayjs(value);
+                        if (settings.overrideTimezone) {
+                            date = date.tz(settings.timezone, true);
+                        }
+                    }
+
                     if(date && date.isValid()) {
+
                         var strVal = date.format(scope.dateFormat);
                         updateInputElement(strVal);
                         return strVal;
@@ -596,17 +604,20 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 };
 
                 ngModel.$parsers.unshift(function(value) {
-                    var parsed = dayjs(value, scope.dateFormat, scope.currentLocale, true).tz(scope.currentTZ);
+                    var parsed = dayjs(value, scope.dateFormat, scope.settings.currentLocale, true);
+
                     if(parsed.isValid()) {
-                        if(angular.isDate(ngModel.$modelValue)) {
-                            var originalModel = dayjs(ngModel.$modelValue).tz(scope.currentTZ).locale(scope.currentLocale);
+                        if(dayjs(ngModel.$modelValue).isValid()) {
+                            var originalModel = dayjs(ngModel.$modelValue);
                             originalModel = originalModel.year(parsed.year());
                             originalModel = originalModel.month(parsed.month());
                             originalModel = originalModel.date(parsed.date());
 
                             parsed = originalModel;
                         }
-                        return parsed.toDate();
+
+                        // Returns Dayjs object to the model (toDate)
+                        return parsed;
 
                     } else
                         return null;
@@ -618,21 +629,39 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                     inputContainerCtrl.setHasValue(!ngModel.$isEmpty(value));
                 }
 
-                function updateDate(date) {
-                    var value = null;
-                    if (!angular.isDate(date)) {
-                        value = dayjs(date, scope.dateFormat, scope.currentLocale, true).tz(scope.currentTZ);
-                        if (!value.isValid() && (scope.dateFormat === "L")) {
-                            value = dayjs(date, "l", scope.currentLocale, true).tz(scope.currentTZ);
-                        }
+                function updateDate(date, fromEvent) {
+
+                    var value = dayjs().locale(settings.currentLocale);
+
+                    if (scope.settings.overrideTimezone) {
+                        value = value.tz(settings.timezone, true);
                     } else {
-                        value = dayjs(date).tz(scope.currentTZ).locale(scope.currentLocale);
+                        value = value.tz(dayjs.tz.guess(), true)
                     }
+
+                    if (date !== null) {
+                        if (dayjs(date).isValid() && !fromEvent) {
+                            value = dayjs(date);
+                        } else {
+                            value = dayjs(date, scope.dateFormat, scope.settings.currentLocale, true);
+                            if (!value.isValid() && (scope.dateFormat === "L")) {
+                                value = dayjs(date, "l", scope.settings.currentLocale, true);
+                            }
+
+                            if (scope.settings.overrideTimezone) {
+                                value = value.tz(scope.settings.timezone, true).local()
+                                value = value.tz(scope.settings.timezone)
+                            } else {
+                                value = value.tz(dayjs.tz.guess(), true)
+                            }
+                        }
+                    }
+
                     var strValue = value.format(scope.dateFormat);
 
                     if(value.isValid()) {
                         updateInputElement(strValue);
-                        ngModel.$setViewValue(strValue);
+                        ngModel.$setViewValue(value);
                     } else {
                         updateInputElement(ngModel.$viewValue);
                     }
@@ -656,17 +685,17 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         targetEvent: ev,
                         settings: opts.settings
                     }).then(function(time) {
-                        updateDate(time, true);
+                        updateDate(time, false);
                     }, function (error) {
                         if (opts.clearOnCancel) {
-                            updateDate(null, true);
+                            updateDate(null, false);
                         }
                     });
                 };
 
                 function onInputElementEvents(event) {
                     if(event.target.value !== ngModel.$viewValue)
-                        updateDate(event.target.value);
+                        updateDate(event.target.value, true);
                 }
 
                 inputElement.bind("blur", onInputElementEvents);
@@ -724,7 +753,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", function($mdpDa
                     cancelLabel: scope.cancelLabel,
                     targetEvent: ev
                 }).then(function(time) {
-                    ngModel.$setViewValue(dayjs(time).tz(scope.currentTZ).locale(scope.currentLocale).format(scope.format));
+                    ngModel.$setViewValue(dayjs(time).format(scope.format));
                     ngModel.$render();
                 });
             };
@@ -743,15 +772,12 @@ function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia, opt
     var self = this;
 
     var settings = options.settings;
-    $scope.currentTZ = settings.timezone;
-    $scope.currentLocale = settings.locale;
 
-    console.log(options.settings)
 
     this.VIEW_HOURS = 1;
     this.VIEW_MINUTES = 2;
     this.currentView = this.VIEW_HOURS;
-    this.time = dayjs(time).tz($scope.currentTZ).locale($scope.currentLocale);
+    this.time = dayjs(time);
     this.autoSwitch = !!autoSwitch;
     this.ampm = !!ampm;
 
@@ -782,7 +808,7 @@ function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia, opt
     };
 
     this.confirm = function() {
-        $mdDialog.hide(this.time.toDate());
+        $mdDialog.hide(this.time);
     };
 }
 
@@ -955,7 +981,18 @@ module.provider("$mdpTimePicker", function() {
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
         return function (time, options) {
-            if (!angular.isDate(time)) time = Date.now();
+            var settings = options.settings;
+            if (!dayjs(time).isValid()) {
+                time = dayjs().locale(settings.currentLocale);
+                if (settings.overrideTimezone) {
+                    time = time.tz(settings.timezone, true)
+                } else {
+                    time = time.tz(dayjs.tz.guess(), true)
+                }
+            } else {
+                time = dayjs(time);
+            }
+
             if (!angular.isObject(options)) options = {};
 
             var labelOk = options.okLabel || $mdpLocale.time.okLabel || LABEL_OK;
@@ -1010,14 +1047,14 @@ module.provider("$mdpTimePicker", function() {
 
 function compareTimeValidator(scope, value, format, otherTime, comparator) {
     // take only the date part, not the time part
-    if (angular.isDate(otherTime)) {
-        otherTime = dayjs(otherTime).tz(scope.currentTZ).locale(scope.currentLocale).format(format);
+    if (dayjs(otherTime).isValid()) {
+        otherTime = dayjs(otherTime).format(format);
     }
-    otherTime = dayjs(otherTime, format, scope.currentLocale, true).tz(scope.currentTZ);
-    var date = angular.isDate(value) ? dayjs(value).tz(scope.currentTZ).locale(scope.currentLocale) :  dayjs(value, format, scope.currentLocale, true).tz(scope.currentTZ);
+    otherTime = dayjs(otherTime, format, scope.settings.currentLocale, true);
+    var date = dayjs(value).isValid() ? dayjs(value) :  dayjs(value, format, scope.settings.currentLocale, true);
 
     return !value ||
-            angular.isDate(value) ||
+            dayjs(value).isValid() ||
             !otherTime.isValid() ||
             comparator(date, otherTime);
 }
@@ -1060,7 +1097,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             "ampm": "=?mdpAmpm",
             "inputName": "@?mdpInputName",
             "clearOnCancel": "=?mdpClearOnCancel",
-            "advancedSettings": "=?mdpSettings"
+            "mdpSettings": "=?mdpSettings"
         },
         link: function(scope, element, attrs, controllers, $transclude) {
             var ngModel = controllers[0];
@@ -1114,7 +1151,14 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
 
             // update input element if model has changed
             ngModel.$formatters.unshift(function(value) {
-                var time = angular.isDate(value) && dayjs(value).tz(scope.currentTZ).locale(scope.currentLocale);
+                var time = null;
+                if (dayjs(value).isValid()) {
+                    var time = dayjs(value);
+                    if (settings.overrideTimezone) {
+                        time = time.tz(settings.timezone, true);
+                    }
+                }
+
                 if(time && time.isValid()) {
                     var strVal = time.format(scope.timeFormat);
                     updateInputElement(strVal);
@@ -1126,7 +1170,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             });
 
             ngModel.$validators.format = function(modelValue, viewValue) {
-                return !viewValue || angular.isDate(viewValue) || dayjs(viewValue, scope.timeFormat, scope.currentLocale, true).tz(scope.currentTZ).isValid();
+                return !viewValue || dayjs(viewValue).isValid() || dayjs(viewValue, scope.timeFormat, scope.settings.currentLocale, true).isValid();
             };
 
             ngModel.$validators.required = function(modelValue, viewValue) {
@@ -1142,18 +1186,21 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             };
 
             ngModel.$parsers.unshift(function(value) {
-                var parsed = dayjs(value, scope.timeFormat, scope.currentLocale, true).tz(scope.currentTZ);
+                var parsed = dayjs(value, scope.timeFormat, scope.settings.currentLocale, true);
+
                 if(parsed.isValid()) {
-                    if(angular.isDate(ngModel.$modelValue)) {
-                        var originalModel = dayjs(ngModel.$modelValue).tz(scope.currentTZ).locale(scope.currentLocale);
+                    if(dayjs(ngModel.$modelValue).isValid()) {
+                        var originalModel = dayjs(ngModel.$modelValue);
                         originalModel = originalModel.minute(parsed.minute());
                         originalModel = originalModel.hour(parsed.hour());
                         originalModel = originalModel.second(parsed.second());
 
+
                         parsed = originalModel;
                     }
-                    return parsed.toDate();
 
+                    // Returns Dayjs object to the model (toDate)
+                    return parsed;
                 } else
                     return null;
             });
@@ -1164,18 +1211,45 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                 inputContainerCtrl.setHasValue(!ngModel.$isEmpty(value));
             }
 
-            function updateTime(time, strict) {
-                var value = null;
-                if (!angular.isDate(time)) {
-                    value = dayjs(time, scope.timeFormat, scope.currentLocale, strict).tz(scope.currentTZ);
+            function updateTime(time, fromManualInput) {
+                var value = dayjs().locale(settings.currentLocale);
+
+                if (settings.overrideTimezone) {
+                    value = value.tz(settings.timezone, true);
                 } else {
-                    value = dayjs(time).tz(scope.currentTZ).locale(scope.currentLocale);
+                    value = value.tz(dayjs.tz.guess(), true)
                 }
+
+                if (time !== null) {
+
+                    if (dayjs(time).isValid() && !fromManualInput) {
+                        value = dayjs(time);
+                    } else {
+                        // Check if the locale is loaded
+                        if (angular.isDefined(dayjs.Ls[value.locale()])) {
+                            if (dayjs.Ls[value.locale()].formats.LT === "HH:mm") {
+                                if (time.length === 4 && time.split(":").length === 1) {
+                                    time = time.slice(0, 2) + ":" + time.slice(2, 4);
+                                }
+                            }
+                        }
+                        value = dayjs(time, scope.timeFormat, scope.settings.currentLocale);
+
+                        if (settings.overrideTimezone) {
+                            value = value.tz(scope.settings.timezone, true).local()
+                            value = value.tz(scope.settings.timezone)
+                        } else {
+                            value = value.tz(dayjs.tz.guess(), true)
+                        }
+                    }
+                }
+
+
                 var strValue = value.format(scope.timeFormat);
 
                 if(value.isValid()) {
                     updateInputElement(strValue);
-                    ngModel.$setViewValue(strValue);
+                    ngModel.$setViewValue(value);
                 } else {
                     updateInputElement(ngModel.$viewValue);
                 }
@@ -1199,17 +1273,17 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                     settings: opts.settings
                 }).then(function(time)
                 {
-                    updateTime(time, true);
+                    updateTime(time);
                 }, function (error) {
                     if (opts.clearOnCancel) {
-                        updateTime(null, true);
+                        updateTime(null);
                     }
                 });
             };
 
             function onInputElementEvents(event) {
                 if(event.target.value !== ngModel.$viewValue)
-                    updateTime(event.target.value, false);
+                    updateTime(event.target.value, true);
             }
 
             inputElement.bind("blur", onInputElementEvents);
@@ -1247,7 +1321,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", function($mdpTi
                     cancelLabel: scope.cancelLabel,
                     ampm: scope.ampm
                 }).then(function(time) {
-                    ngModel.$setViewValue(dayjs(time).tz(scope.currentTZ).locale(scope.currentLocale).format(scope.format));
+                    ngModel.$setViewValue(dayjs(time).format(scope.format));
                     ngModel.$render();
                 });
             };

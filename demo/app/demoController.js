@@ -6,7 +6,7 @@
 /*@ngInject*/
 export default function DemoController($scope, $window, $mdpDatePicker, $mdpTimePicker) {
 
-    $scope.settings1 = {timezone: "Europe/Zurich", locale: "de-ch"};
+    $scope.settings1 = {locale: "de-ch"};
 
     $scope.date1 = null;
 

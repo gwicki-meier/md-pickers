@@ -16,7 +16,7 @@ export default angular.module("demo", [
                 $mdpLocale.time.timeFormat = "LT";
                 $mdpLocale.time.noFloat = true;
                 $mdpLocale.time.openOnClick = false;
-                $mdpLocale.time.autoSwitch = false;
+                $mdpLocale.time.autoSwitch = true;
                 $mdpLocale.time.ampm = false;
                 $mdpLocale.time.clearOnCancel = false;
 
