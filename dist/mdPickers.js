@@ -29,6 +29,9 @@ function setCurrentSettingsToScope(scope, newSettings) {
 
 
     if (angular.isDefined(newSettings)) {
+        if (newSettings.currentLocale) {
+            scope.settings.currentLocale = newSettings.currentLocale;
+        }
         if (newSettings.locale) {
             scope.settings.currentLocale = newSettings.locale;
         }
