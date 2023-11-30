@@ -20,17 +20,17 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 }]);
 
 
-function setCurrentSettingsToScope(scope) {
+function setCurrentSettingsToScope(scope, newSettings) {
     var settings = scope.settings;
     settings.disableTimezone = false;
     settings.currentLocale = "en";
 
-    if (angular.isDefined(scope.mdpSettings)) {
-        var mdpSettings = scope.mdpSettings;
-        if (mdpSettings.locale) {
-            settings.currentLocale = mdpSettings.locale;
+
+    if (angular.isDefined(newSettings)) {
+        if (newSettings.locale) {
+            scope.settings.currentLocale = newSettings.locale;
         }
-        if (mdpSettings.disableTimezone) {
+        if (newSettings.disableTimezone) {
             settings.disableTimezone = true;
         }
     }
@@ -65,7 +65,6 @@ var extendedMoment = (function ({attrs, disableTimezone}){
                 this.moment = moment.utc(...attrs);
                 this.disableTimezone = true;
             } else {
-                // console.log(...attrs)
                 this.moment = moment.utc(...attrs).tz(moment.tz.guess())
                 this.disableTimezone = false;
             }

@@ -422,7 +422,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 scope.model = ngModel;
                 scope.settings = {};
 
-                setCurrentSettingsToScope(scope);
+                setCurrentSettingsToScope(scope, scope.mdpSettings);
 
                 scope.isError = function() {
                     return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));
@@ -431,6 +431,10 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 scope.required = function() {
                     return !!attrs.required;
                 };
+
+                scope.$watch('mdpSettings', function(newSettings, oldValue) {
+                    setCurrentSettingsToScope(scope, newSettings);
+                }, true);
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {

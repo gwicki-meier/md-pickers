@@ -3,8 +3,6 @@
 function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia, options) {
     var self = this;
 
-    console.log(options)
-
     this.VIEW_HOURS = 1;
     this.VIEW_MINUTES = 2;
     this.currentView = this.VIEW_HOURS;
@@ -358,7 +356,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             scope.model = ngModel;
             scope.settings = settings;
 
-            setCurrentSettingsToScope(scope);
+            setCurrentSettingsToScope(scope, scope.mdpSettings);
 
             scope.isError = function() {
                 return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));
@@ -367,6 +365,10 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             scope.required = function() {
                 return !!attrs.required;
             };
+
+            scope.$watch('mdpSettings', function(newSettings, oldValue) {
+                setCurrentSettingsToScope(scope, newSettings);
+            }, true);
 
             scope.$watch(function() { return ngModel.$error }, function(newValue, oldValue) {
                 inputContainerCtrl.setInvalid(!ngModel.$pristine && !!Object.keys(ngModel.$error).length);

@@ -22,17 +22,17 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 }]);
 
 
-function setCurrentSettingsToScope(scope) {
+function setCurrentSettingsToScope(scope, newSettings) {
     var settings = scope.settings;
     settings.disableTimezone = false;
     settings.currentLocale = "en";
 
-    if (angular.isDefined(scope.mdpSettings)) {
-        var mdpSettings = scope.mdpSettings;
-        if (mdpSettings.locale) {
-            settings.currentLocale = mdpSettings.locale;
+
+    if (angular.isDefined(newSettings)) {
+        if (newSettings.locale) {
+            scope.settings.currentLocale = newSettings.locale;
         }
-        if (mdpSettings.disableTimezone) {
+        if (newSettings.disableTimezone) {
             settings.disableTimezone = true;
         }
     }
@@ -67,7 +67,6 @@ var extendedMoment = (function ({attrs, disableTimezone}){
                 this.moment = moment.utc(...attrs);
                 this.disableTimezone = true;
             } else {
-                // console.log(...attrs)
                 this.moment = moment.utc(...attrs).tz(moment.tz.guess())
                 this.disableTimezone = false;
             }
@@ -584,7 +583,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 scope.model = ngModel;
                 scope.settings = {};
 
-                setCurrentSettingsToScope(scope);
+                setCurrentSettingsToScope(scope, scope.mdpSettings);
 
                 scope.isError = function() {
                     return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));
@@ -593,6 +592,10 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 scope.required = function() {
                     return !!attrs.required;
                 };
+
+                scope.$watch('mdpSettings', function(newSettings, oldValue) {
+                    setCurrentSettingsToScope(scope, newSettings);
+                }, true);
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
@@ -800,8 +803,6 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", function($mdpDa
 
 function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia, options) {
     var self = this;
-
-    console.log(options)
 
     this.VIEW_HOURS = 1;
     this.VIEW_MINUTES = 2;
@@ -1156,7 +1157,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             scope.model = ngModel;
             scope.settings = settings;
 
-            setCurrentSettingsToScope(scope);
+            setCurrentSettingsToScope(scope, scope.mdpSettings);
 
             scope.isError = function() {
                 return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));
@@ -1165,6 +1166,10 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             scope.required = function() {
                 return !!attrs.required;
             };
+
+            scope.$watch('mdpSettings', function(newSettings, oldValue) {
+                setCurrentSettingsToScope(scope, newSettings);
+            }, true);
 
             scope.$watch(function() { return ngModel.$error }, function(newValue, oldValue) {
                 inputContainerCtrl.setInvalid(!ngModel.$pristine && !!Object.keys(ngModel.$error).length);
