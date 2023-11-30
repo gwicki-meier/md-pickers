@@ -10,11 +10,12 @@ import ngMaterial from 'angular-material';
 import ngMessages from "angular-messages";
 import demo from "./demo";
 
-import dayjs from "dayjs";
-import * as locale_de from 'dayjs/locale/de';
-import * as locale_dech from 'dayjs/locale/de-ch';
-import * as locale_frch from 'dayjs/locale/fr-ch';
-import * as locale_itch from 'dayjs/locale/it-ch';
+import moment from "moment-timezone/builds/moment-timezone-with-data-10-year-range";
+import "../locale/de";
+import "../locale/de-ch";
+import "../locale/fr-ch";
+import "../locale/it-ch";
+moment.locale("en");
 
 
 export default angular.module("demoApp", [
@@ -32,11 +33,6 @@ Date.prototype.addDays = function (days) {
 }
 
 function DemoAppService($window) {
-    $window.dayjs = dayjs;
-    $window.dayjs.locale(locale_de);
-    $window.dayjs.locale(locale_dech);
-    $window.dayjs.locale(locale_frch);
-    $window.dayjs.locale(locale_itch);
-    $window.dayjs.locale('en');
+    $window.moment = moment;
     return {};
 }

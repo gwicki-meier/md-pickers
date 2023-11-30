@@ -35,7 +35,8 @@
     "angular-aria": "1.5.8",
     "angular-material": "1.1.9",
     "angular-messages": "1.5.8",
-    "dayjs": "^1.11.10"
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43"
   },
   "devDependencies": {
     "gulp": "^4.0.2",

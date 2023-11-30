@@ -9,8 +9,11 @@ export default function DemoController($scope, $window, $mdpDatePicker, $mdpTime
     $scope.settings1 = {locale: "de-ch"};
 
     $scope.date1 = null;
+    if ($scope.date1 === null) {
+        $scope.date1 = new Date("2017-07-15T13:47:20.789Z");
+    }
 
-    $scope.settings2 = {timezone: "Europe/London", locale: "de-ch"};
+    $scope.settings2 = {disableTimezone: true, locale: "de-ch"};
 
     $scope.date2 = null;
     $scope.minDate2 = new Date().addDays(-7);
@@ -33,8 +36,8 @@ export default function DemoController($scope, $window, $mdpDatePicker, $mdpTime
     $scope.custom.cancelLabel3 = "cancel!";
     $scope.custom.clearOnCancel3 = true;
     $scope.custom.dateFormat3 = "DD-MM-YYYY";
-    $scope.custom.minDateStr3 = dayjs(new Date().addDays(-7)).format($scope.custom.dateFormat3);
-    $scope.custom.maxDateStr3 = dayjs(new Date().addDays(7)).format($scope.custom.dateFormat3);
+    $scope.custom.minDateStr3 = moment(new Date().addDays(-7)).format($scope.custom.dateFormat3);
+    $scope.custom.maxDateStr3 = moment(new Date().addDays(7)).format($scope.custom.dateFormat3);
     $scope.custom.maxDate3 = new Date().addDays(7);
     $scope.custom.dateFilterEnabled3 = false;
     $scope.custom.dateFilterNo3 = false;
@@ -50,7 +53,8 @@ export default function DemoController($scope, $window, $mdpDatePicker, $mdpTime
 
     $scope.showDatePicker = function(ev) {
         $mdpDatePicker($scope.currentDate, {
-            targetEvent: ev
+            targetEvent: ev,
+            settings: {currentLocale: "de-ch", disableTimezone: false}
         }).then(function(selectedDate) {
             $scope.currentDate = selectedDate;
         });
@@ -58,17 +62,18 @@ export default function DemoController($scope, $window, $mdpDatePicker, $mdpTime
 
     $scope.showTimePicker = function(ev) {
         $mdpTimePicker($scope.currentDate, {
-            targetEvent: ev
+            targetEvent: ev,
+            settings: {currentLocale: "de-ch", disableTimezone: false}
         }).then(function(selectedDate) {
             $scope.currentDate = selectedDate;
         });
     };
 
     $scope.$watch('custom.minDateStr3', function(newValue, oldValue) {
-        $scope.custom.minDate3 = dayjs(newValue, $scope.custom.dateFormat3, true);
+        $scope.custom.minDate3 = moment(newValue, $scope.custom.dateFormat3, true);
     });
     $scope.$watch('custom.maxDateStr3', function(newValue, oldValue) {
-        $scope.custom.maxDate3 = dayjs(newValue, $scope.custom.dateFormat3, true);
+        $scope.custom.maxDate3 = moment(newValue, $scope.custom.dateFormat3, true);
     });
 
     $scope.$watch('custom.dateFilterNo3', function (newValue, oldValue) {

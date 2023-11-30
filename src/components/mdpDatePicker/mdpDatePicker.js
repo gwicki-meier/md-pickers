@@ -3,11 +3,12 @@
 function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, options) {
     var self = this;
 
-    var settings = options.settings;
-
-    this.date = dayjs(currentDate);
-    this.minDate = options.minDate && dayjs(options.minDate).isValid() ? dayjs(options.minDate) : null;
-    this.maxDate = options.maxDate && dayjs(options.maxDate).isValid() ? dayjs(options.maxDate) : null;
+    this.date = extendedMoment({attrs: [currentDate], disableTimezone: options.settings.disableTimezone});
+    this.date.setLocale(options.settings.currentLocale);
+    this.minDate = options.minDate && extendedMoment({attrs: [options.minDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale)
+        .moment.isValid() ? extendedMoment({attrs: [options.minDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment : null;
+    this.maxDate = options.maxDate && extendedMoment({attrs: [options.maxDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale)
+        .moment.isValid() ? extendedMoment({attrs: [options.maxDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment : null;
     this.displayFormat = options.displayFormat || "ddd, MMM DD";
     this.dateFilter = angular.isFunction(options.dateFilter) ? options.dateFilter : null;
     this.selectingYear = false;
@@ -15,19 +16,19 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     // validate min and max date
     if (this.minDate && this.maxDate) {
         if (this.maxDate.isBefore(this.minDate)) {
-            this.maxDate = dayjs(this.minDate).add(1, 'days');
+            this.maxDate = extendedMoment({attrs: [this.minDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment.add(1, 'days');
         }
     }
 
-    if (this.date) {
+    if (this.date.moment) {
         // check min date
-        if (this.minDate && this.date.isBefore(this.minDate)) {
-            this.date = dayjs(this.minDate);
+        if (this.minDate && this.date.moment.isBefore(this.minDate)) {
+            this.date.moment = extendedMoment({attrs: [this.minDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment;
         }
 
         // check max date
-        if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            this.date = dayjs(this.maxDate);
+        if (this.maxDate && this.date.moment.isAfter(this.maxDate)) {
+            this.date.moment = extendedMoment({attrs: [this.maxDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment;
         }
     }
 
@@ -51,10 +52,10 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     };
 
     $scope.$mdMedia = $mdMedia;
-    $scope.year = this.date.year();
+    $scope.year = this.date.moment.year();
 
     this.selectYear = function(year) {
-        self.date = self.date.year(year);
+        self.date.moment.year(year);
         $scope.year = year;
         self.selectingYear = false;
         self.animate();
@@ -62,8 +63,8 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
 
     this.showYear = function() {
 
-        self.yearTopIndex = (self.date.year() - self.yearItems.START) + Math.floor(self.yearItems.PAGE_SIZE / 2);
-        self.yearItems.currentIndex_ = (self.date.year() - self.yearItems.START) + 1;
+        self.yearTopIndex = (self.date.moment.year() - self.yearItems.START) + Math.floor(self.yearItems.PAGE_SIZE / 2);
+        self.yearItems.currentIndex_ = (self.date.moment.year() - self.yearItems.START) + 1;
         self.selectingYear = true;
     };
 
@@ -76,17 +77,16 @@ function DatePickerCtrl($scope, $mdDialog, $mdMedia, $timeout, currentDate, opti
     };
 
     this.confirm = function() {
-        var date = this.date;
+        var date = this.date.moment;
 
-        if (this.minDate && this.date.isBefore(this.minDate)) {
-            date = dayjs(this.minDate);
+        if (this.minDate && this.date.moment.isBefore(this.minDate)) {
+            date = extendedMoment({attrs: [this.minDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment;
         }
 
-        if (this.maxDate && this.date.isAfter(this.maxDate)) {
-            date = dayjs(this.maxDate);
+        if (this.maxDate && this.date.moment.isAfter(this.maxDate)) {
+            date = extendedMoment({attrs: [this.maxDate], disableTimezone: options.settings.disableTimezone}).setLocale(options.settings.currentLocale).moment;;
         }
-
-        $mdDialog.hide(date);
+        $mdDialog.hide(date.toDate());
     };
 
     this.animate = function() {
@@ -123,21 +123,13 @@ module.provider("$mdpDatePicker", function() {
 
     this.$get = ["$mdDialog", "$mdpLocale", function($mdDialog, $mdpLocale) {
         return function (currentDate, options) {
-            var settings = options.settings;
-            if (!dayjs(currentDate).isValid()) {
-                currentDate = dayjs().locale(settings.currentLocale);
-                if (settings.overrideTimezone) {
-                    currentDate = currentDate.tz(settings.timezone, true);
-                } else {
-                    currentDate = currentDate.tz(dayjs.tz.guess(), true)
-                }
-            } else {
-                currentDate = dayjs(currentDate);
-            }
+            options.displayFormat = options.displayFormat || $mdpLocale.date.displayFormat || DISPLAY_FORMAT;
+            options.settings = options.settings || {disableTimezone: false, currentLocale: "en"};
 
             if (!angular.isObject(options)) options = {};
-
-            options.displayFormat = options.displayFormat || $mdpLocale.date.displayFormat || DISPLAY_FORMAT;
+            if (!angular.isDate(currentDate)) {
+                currentDate = newDate(options.settings);
+            }
 
             var labelOk = options.okLabel || $mdpLocale.date.okLabel || LABEL_OK;
             var labelCancel = options.cancelLabel || $mdpLocale.date.cancelLabel || LABEL_CANCEL;
@@ -150,8 +142,8 @@ module.provider("$mdpDatePicker", function() {
                     '<md-dialog-content layout="row" layout-wrap>' +
                     '<div layout="column" layout-align="start center">' +
                     '<md-toolbar layout-align="start start" flex class="mdp-datepicker-date-wrapper md-hue-1 md-primary" layout="column">' +
-                    '<span class="mdp-datepicker-year" ng-click="datepicker.showYear()" ng-class="{ \'active\': datepicker.selectingYear }">{{ datepicker.date.format(\'YYYY\') }}</span>' +
-                    '<span class="mdp-datepicker-date" ng-click="datepicker.showCalendar()" ng-class="{ \'active\': !datepicker.selectingYear }">{{ datepicker.date.format(datepicker.displayFormat) }}</span> ' +
+                    '<span class="mdp-datepicker-year" ng-click="datepicker.showYear()" ng-class="{ \'active\': datepicker.selectingYear }">{{ datepicker.date.moment.format(\'YYYY\') }}</span>' +
+                    '<span class="mdp-datepicker-date" ng-click="datepicker.showCalendar()" ng-class="{ \'active\': !datepicker.selectingYear }">{{ datepicker.date.moment.format(datepicker.displayFormat) }}</span> ' +
                     '</md-toolbar>' +
 
                     '</div>' +
@@ -191,13 +183,13 @@ function CalendarCtrl($scope) {
 
     this.$onInit = function () {
         self.daysInMonth = [];
-        self.dow = dayjs.localeData().firstDayOfWeek();
+        self.dow = self.date.moment.localeData().firstDayOfWeek();
         self.weekDays = [].concat(
-            dayjs.weekdaysMin().slice(self.dow),
-            dayjs.weekdaysMin().slice(0, self.dow)
+            moment.weekdaysMin().slice(self.dow),
+            moment.weekdaysMin().slice(0, self.dow)
         );
         $scope.$watch(function () {
-            return self.date.unix()
+            return self.date.moment.unix()
         }, function (newValue, oldValue) {
             if (newValue && newValue !== oldValue)
                 self.updateDaysInMonth();
@@ -206,8 +198,8 @@ function CalendarCtrl($scope) {
     };
 
     this.getDaysInMonth = function() {
-        var days = self.date.daysInMonth(),
-            firstDay = self.date.date(1).day() - this.dow;
+        var days = self.date.moment.daysInMonth(),
+            firstDay = extendedMoment({attrs: [self.date.moment], disableTimezone: self.date.disableTimezone}).setLocale(self.date.currentLocale).moment.date(1).day() - this.dow;
 
         if(firstDay < 0) firstDay = this.weekDays.length - 1;
 
@@ -217,7 +209,7 @@ function CalendarCtrl($scope) {
             if(i > firstDay) {
                 day =  {
                     value: (i - firstDay),
-                    enabled: self.isDayEnabled(self.date.date(i - firstDay).toDate())
+                    enabled: self.isDayEnabled(extendedMoment({attrs: [self.date.moment], disableTimezone: self.date.disableTimezone}).setLocale(self.date.currentLocale).moment.date(i - firstDay).toDate())
                 };
             }
             arr.push(day);
@@ -235,22 +227,22 @@ function CalendarCtrl($scope) {
     };
 
     this.selectDate = function(dom) {
-        self.date = self.date.date(dom);
+        self.date.moment.date(dom);
     };
 
     this.nextMonth = function() {
-        self.date = self.date.add(1, 'months');
+        self.date.moment.add(1, 'months');
     };
 
     this.prevMonth = function() {
-        self.date = self.date.subtract(1, 'months');
+        self.date.moment.subtract(1, 'months');
     };
 
     this.updateDaysInMonth = function() {
         self.daysInMonth = self.getDaysInMonth();
     };
 
-    $scope.$watch(function() { return  self.date.unix() }, function(newValue, oldValue) {
+    $scope.$watch(function() { return  self.date.moment.unix() }, function(newValue, oldValue) {
         if(newValue && newValue !== oldValue)
             self.updateDaysInMonth();
     });
@@ -268,7 +260,7 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
         template: '<div class="mdp-calendar">' +
                     '<div layout="row" layout-align="space-between center">' +
                         '<md-button aria-label="previous month" class="md-icon-button" ng-click="calendar.prevMonth()"><md-icon md-svg-icon="mdp-chevron-left"></md-icon></md-button>' +
-                        '<div class="mdp-calendar-monthyear" ng-show="!calendar.animating">{{ calendar.date.format("MMMM YYYY") }}</div>' +
+                        '<div class="mdp-calendar-monthyear" ng-show="!calendar.animating">{{ calendar.date.moment.format("MMMM YYYY") }}</div>' +
                         '<md-button aria-label="next month" class="md-icon-button" ng-click="calendar.nextMonth()"><md-icon md-svg-icon="mdp-chevron-right"></md-icon></md-button>' +
                     '</div>' +
                     '<div layout="row" layout-align="space-around center" class="mdp-calendar-week-days" ng-show="!calendar.animating">' +
@@ -276,7 +268,7 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
                     '</div>' +
                     '<div layout="row" layout-align="start center" layout-wrap class="mdp-calendar-days" ng-class="{ \'mdp-animate-next\': calendar.animating }" ng-show="!calendar.animating" md-swipe-left="calendar.nextMonth()" md-swipe-right="calendar.prevMonth()">' +
                         '<div layout layout-align="center center" ng-repeat-start="day in calendar.daysInMonth track by $index" ng-class="{ \'mdp-day-placeholder\': !day }">' +
-                            '<md-button class="md-icon-button" aria-label="Select day" ng-mouseenter="raised = true" ng-mouseleave="raised = false" ng-if="day" ng-class="{ \'md-accent\': calendar.date.date() == day.value, \'md-raised\': raised || calendar.date.date() == day.value }" ng-dblclick="datepicker.confirm()" ng-click="calendar.selectDate(day.value)" ng-disabled="!day.enabled">{{ day.value }}</md-button>' +
+                            '<md-button class="md-icon-button" aria-label="Select day" ng-mouseenter="raised = true" ng-mouseleave="raised = false" ng-if="day" ng-class="{ \'md-accent\': calendar.date.moment.date() == day.value, \'md-raised\': raised || calendar.date.moment.date() == day.value }" ng-dblclick="datepicker.confirm()" ng-click="calendar.selectDate(day.value)" ng-disabled="!day.enabled">{{ day.value }}</md-button>' +
                         '</div>' +
                         '<div flex="100" ng-if="($index + 1) % 7 == 0" ng-repeat-end></div>' +
                     '</div>' +
@@ -295,7 +287,7 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
 
             scope.raised = false;
 
-            scope.$watch(function() { return  ctrl.date.format("YYYYMM") }, function(newValue, oldValue) {
+            scope.$watch(function() { return  ctrl.date.moment.format("YYYYMM") }, function(newValue, oldValue) {
                 var direction = null;
 
                 if(newValue > oldValue)
@@ -315,19 +307,21 @@ module.directive("mdpCalendar", ["$animate", function($animate) {
 }]);
 
 function formatValidator(scope, value, format) {
-    return !value || dayjs(value).isValid() ||dayjs(value, format, scope.settings.currentLocale,true).isValid();
+    return !value || angular.isDate(value) || extendedMoment({attrs: [value, format], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment.isValid();
 }
 
 function compareDateValidator(scope, value, format, otherDate, comparator) {
     // take only the date part, not the time part
-    if (dayjs(otherDate).isValid()) {
-        otherDate = dayjs(otherDate).format(format);
+    if (angular.isDate(otherDate)) {
+        otherDate = extendedMoment({attrs: [otherDate], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment.format(format);
     }
-    otherDate = dayjs(otherDate, format, scope.settings.currentLocale, true);
-    var date = dayjs(value).isValid() ? dayjs(value) :  dayjs(value, format, scope.settings.currentLocale, true);
+    otherDate = extendedMoment({attrs: [otherDate, format, scope.settings.currentLocale, true], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
+    var date = extendedMoment({attrs: [value], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale)
+        .moment ? extendedMoment({attrs: [value], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale)
+        .moment :  extendedMoment({attrs: [value, format, true], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
 
     return !value ||
-            dayjs(value).isValid() ||
+            angular.isDate(value) ||
             !otherDate.isValid() ||
             comparator(date, otherDate);
 }
@@ -341,10 +335,11 @@ function maxDateValidator(scope, value, format, maxDate) {
 }
 
 function filterValidator(scope, value, format, filter) {
-    var date = dayjs(value).isValid() ? dayjs(value) :  dayjs(value, format, scope.settings.currentLocale, true);
+    var date = angular.isDate(value) ? extendedMoment({attrs: [value], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale)
+        .moment :  extendedMoment({attrs: [value, format, true], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
 
     return !value ||
-            dayjs(value).isValid() ||
+        angular.isDate(value) ||
             !angular.isFunction(filter) ||
             !filter(date.toDate());
 }
@@ -387,7 +382,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
             "mdpSettings": "=?mdpSettings"
         },
         link: {
-            pre: function(scope, element, attrs, constollers, $transclude) {
+            pre: function(scope, element, attrs, controllers, $transclude) {
 
             },
             post: function(scope, element, attrs, controllers, $transclude) {
@@ -421,12 +416,11 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 });
 
                 var messages = angular.element(inputContainer[0].querySelector("[ng-messages]"));
-                var settings = {};
 
                 scope.type = scope.dateFormat || $mdpLocale.date.dateFormat ? "text" : "date";
                 scope.dateFormat = scope.dateFormat || $mdpLocale.date.dateFormat || "YYYY-MM-DD";
                 scope.model = ngModel;
-                scope.settings = settings;
+                scope.settings = {};
 
                 setCurrentSettingsToScope(scope);
 
@@ -440,20 +434,12 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
-                    var date = null;
-
-                    if (dayjs(value).isValid()) {
-                        date = dayjs(value);
-                        if (settings.overrideTimezone) {
-                            date = date.tz(settings.timezone, true);
-                        }
-                    }
-
+                    var date = angular.isDate(value) && extendedMoment({attrs: [value], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
                     if(date && date.isValid()) {
 
                         var strVal = date.format(scope.dateFormat);
                         updateInputElement(strVal);
-                        return strVal;
+                        return null;
                     } else {
                         updateInputElement(null);
                         return null;
@@ -481,21 +467,17 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 };
 
                 ngModel.$parsers.unshift(function(value) {
-                    var parsed = dayjs(value, scope.dateFormat, scope.settings.currentLocale, true);
-
+                    var parsed = extendedMoment({attrs: [value], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
                     if(parsed.isValid()) {
-                        if(dayjs(ngModel.$modelValue).isValid()) {
-                            var originalModel = dayjs(ngModel.$modelValue);
-                            originalModel = originalModel.year(parsed.year());
-                            originalModel = originalModel.month(parsed.month());
-                            originalModel = originalModel.date(parsed.date());
+                        if(angular.isDate(ngModel.$modelValue)) {
+                            var originalModel = extendedMoment({attrs: [ngModel.$modelValue], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
+                            originalModel.year(parsed.year());
+                            originalModel.month(parsed.month());
+                            originalModel.date(parsed.date());
 
                             parsed = originalModel;
                         }
-
-                        // Returns Dayjs object to the model (toDate)
-                        return parsed;
-
+                        return parsed.toDate();
                     } else
                         return null;
                 });
@@ -507,40 +489,49 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 }
 
                 function updateDate(date, fromEvent) {
-
-                    var value = dayjs().locale(settings.currentLocale);
-
-                    if (scope.settings.overrideTimezone) {
-                        value = value.tz(settings.timezone, true);
-                    } else {
-                        value = value.tz(dayjs.tz.guess(), true)
-                    }
-
-                    if (date !== null) {
-                        if (dayjs(date).isValid() && !fromEvent) {
-                            value = dayjs(date);
+                    var value;
+                    var ok = true;
+                    if (fromEvent) {
+                        if (date === "") {
+                            var previousValue = ngModel.$modelValue;
+                            ok = false;
+                            if (previousValue === null) {
+                                previousValue = newDate(scope.settings)
+                                // No Time or Date was set before, so we set the current date
+                                ok = true;
+                            }
+                            value = extendedMoment({attrs: [previousValue], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
                         } else {
-                            value = dayjs(date, scope.dateFormat, scope.settings.currentLocale, true);
+                            value = extendedMoment({
+                                attrs: [date, scope.dateFormat, scope.settings.currentLocale, true],
+                                disableTimezone: scope.settings.disableTimezone
+                            }).setLocale(scope.settings.currentLocale).moment;
                             if (!value.isValid() && (scope.dateFormat === "L")) {
-                                value = dayjs(date, "l", scope.settings.currentLocale, true);
+                                value = extendedMoment({
+                                    attrs: [date, "l", scope.settings.currentLocale, true],
+                                    disableTimezone: scope.settings.disableTimezone
+                                }).setLocale(scope.settings.currentLocale).moment;
                             }
-
-                            if (scope.settings.overrideTimezone) {
-                                value = value.tz(scope.settings.timezone, true).local()
-                                value = value.tz(scope.settings.timezone)
-                            } else {
-                                value = value.tz(dayjs.tz.guess(), true)
-                            }
+                            value.minutes(0);
+                            value.hours(0)
+                        }
+                    } else {
+                        if (angular.isDate(date)) {
+                            value = extendedMoment({attrs: [date, null, true], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
+                        } else {
+                            value = extendedMoment({attrs: [date, scope.dateFormat, true], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
                         }
                     }
 
+                    value.locale(scope.settings.currentLocale);
                     var strValue = value.format(scope.dateFormat);
 
-                    if(value.isValid()) {
+                    if(value.isValid() && ok) {
                         updateInputElement(strValue);
                         ngModel.$setViewValue(value);
                     } else {
-                        updateInputElement(ngModel.$viewValue);
+                        updateInputElement(strValue);
+
                     }
 
                     if(!ngModel.$pristine &&
@@ -562,10 +553,10 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                         targetEvent: ev,
                         settings: opts.settings
                     }).then(function(time) {
-                        updateDate(time, false);
+                        updateDate(time);
                     }, function (error) {
                         if (opts.clearOnCancel) {
-                            updateDate(null, false);
+                            updateDate(null);
                         }
                     });
                 };
@@ -630,7 +621,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", function($mdpDa
                     cancelLabel: scope.cancelLabel,
                     targetEvent: ev
                 }).then(function(time) {
-                    ngModel.$setViewValue(dayjs(time).format(scope.format));
+                    ngModel.$setViewValue(extendedMoment({attrs: [time], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment.format(scope.format));
                     ngModel.$render();
                 });
             };

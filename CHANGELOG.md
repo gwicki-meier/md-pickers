@@ -1,3 +1,14 @@
+### 2.0.0
+
+#### Features
+* Added support for setting locale and disableTimezone using mdp-settings.
+  * mdp-settings object: `{currentLocale: 'de', disableTimezone: false}`
+  * If disableTimezone is true, then datePicker and TimePicker works in UTC Mode.
+* If locales are required, these must be added manually. The code must be modified, `moment` must be replaced with `moment-timezone`. See demo source code.
+
+#### Breaking changes
+* locale must be set with mdp-settings={currentLocale: "de-ch"}
+
 ### 1.2.0
 
 #### Bugfix
