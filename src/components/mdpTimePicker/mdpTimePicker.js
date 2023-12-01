@@ -364,9 +364,6 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                 return !!attrs.required;
             };
 
-            scope.$watch('mdpSettings', function(newSettings, oldValue) {
-                setCurrentSettingsToScope(scope, newSettings);
-            }, true);
 
             scope.$watch(function() { return ngModel.$error }, function(newValue, oldValue) {
                 inputContainerCtrl.setInvalid(!ngModel.$pristine && !!Object.keys(ngModel.$error).length);

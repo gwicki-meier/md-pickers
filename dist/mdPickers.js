@@ -25,6 +25,9 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 function setCurrentSettingsToScope(scope, newSettings) {
     const settings = Object.assign({}, newSettings);
 
+    scope.settings.currentLocale = "en";
+    scope.settings.disableTimezone = false;
+
     if (settings.currentLocale) {
         scope.settings.currentLocale = settings.currentLocale;
     }
@@ -33,10 +36,7 @@ function setCurrentSettingsToScope(scope, newSettings) {
     }
     if (settings.disableTimezone) {
         scope.settings.disableTimezone = true;
-    } else {
-        scope.settings.disableTimezone = false;
     }
-
 }
 
 function newDate(settings) {
@@ -593,9 +593,6 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                     return !!attrs.required;
                 };
 
-                scope.$watch('mdpSettings', function(newSettings, oldValue) {
-                    setCurrentSettingsToScope(scope, newSettings);
-                }, true);
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
@@ -1165,9 +1162,6 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                 return !!attrs.required;
             };
 
-            scope.$watch('mdpSettings', function(newSettings, oldValue) {
-                setCurrentSettingsToScope(scope, newSettings);
-            }, true);
 
             scope.$watch(function() { return ngModel.$error }, function(newValue, oldValue) {
                 inputContainerCtrl.setInvalid(!ngModel.$pristine && !!Object.keys(ngModel.$error).length);

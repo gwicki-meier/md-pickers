@@ -23,6 +23,9 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 function setCurrentSettingsToScope(scope, newSettings) {
     const settings = Object.assign({}, newSettings);
 
+    scope.settings.currentLocale = "en";
+    scope.settings.disableTimezone = false;
+
     if (settings.currentLocale) {
         scope.settings.currentLocale = settings.currentLocale;
     }
@@ -31,10 +34,7 @@ function setCurrentSettingsToScope(scope, newSettings) {
     }
     if (settings.disableTimezone) {
         scope.settings.disableTimezone = true;
-    } else {
-        scope.settings.disableTimezone = false;
     }
-
 }
 
 function newDate(settings) {

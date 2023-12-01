@@ -431,9 +431,6 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                     return !!attrs.required;
                 };
 
-                scope.$watch('mdpSettings', function(newSettings, oldValue) {
-                    setCurrentSettingsToScope(scope, newSettings);
-                }, true);
 
                 // update input element if model has changed
                 ngModel.$formatters.unshift(function(value) {
