@@ -378,8 +378,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
             "openOnClick": "=mdpOpenOnClick",
             "disabled": "=?mdpDisabled",
             "inputName": "@?mdpInputName",
-            "clearOnCancel": "=?mdpClearOnCancel",
-            "mdpSettings": "=?mdpSettings"
+            "clearOnCancel": "=?mdpClearOnCancel"
         },
         link: {
             pre: function(scope, element, attrs, controllers, $transclude) {
@@ -422,7 +421,7 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                 scope.model = ngModel;
                 scope.settings = {};
 
-                setCurrentSettingsToScope(scope, scope.mdpSettings);
+                setCurrentSettingsToScope(scope, $mdpLocale.settings);
 
                 scope.isError = function() {
                     return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));

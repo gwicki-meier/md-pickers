@@ -13,7 +13,6 @@ export default function DemoController($scope, $window, $mdpDatePicker, $mdpTime
         $scope.date1 = new Date("2017-07-15T13:47:20.789Z");
     }
 
-    $scope.settings2 = {disableTimezone: true, locale: "de-ch"};
 
     $scope.date2 = null;
     $scope.minDate2 = new Date().addDays(-7);

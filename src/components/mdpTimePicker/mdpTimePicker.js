@@ -317,8 +317,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             "disabled": "=?mdpDisabled",
             "ampm": "=?mdpAmpm",
             "inputName": "@?mdpInputName",
-            "clearOnCancel": "=?mdpClearOnCancel",
-            "mdpSettings": "=?mdpSettings"
+            "clearOnCancel": "=?mdpClearOnCancel"
         },
         link: function(scope, element, attrs, controllers, $transclude) {
             var ngModel = controllers[0];
@@ -348,15 +347,14 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
             });
 
             var messages = angular.element(inputContainer[0].querySelector("[ng-messages]"));
-            var settings = {};
 
             scope.type = scope.timeFormat || $mdpLocale.time.timeFormat ? "text" : "time";
             scope.timeFormat = scope.timeFormat || $mdpLocale.time.timeFormat || "HH:mm";
             scope.autoSwitch = scope.autoSwitch === undefined ? $mdpLocale.time.autoSwitch : scope.autoSwitch;
             scope.model = ngModel;
-            scope.settings = settings;
+            scope.settings =  {};
 
-            setCurrentSettingsToScope(scope, scope.mdpSettings);
+            setCurrentSettingsToScope(scope, $mdpLocale.settings);
 
             scope.isError = function() {
                 return !!ngModel.$invalid && (!ngModel.$pristine || (form != null && form.$submitted));

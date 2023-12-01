@@ -21,22 +21,20 @@ module.run(["$templateCache", "mdpIconsRegistry", function($templateCache, mdpIc
 
 
 function setCurrentSettingsToScope(scope, newSettings) {
-    var settings = scope.settings;
-    settings.disableTimezone = false;
-    settings.currentLocale = "en";
+    const settings = Object.assign({}, newSettings);
 
-
-    if (angular.isDefined(newSettings)) {
-        if (newSettings.currentLocale) {
-            scope.settings.currentLocale = newSettings.currentLocale;
-        }
-        if (newSettings.locale) {
-            scope.settings.currentLocale = newSettings.locale;
-        }
-        if (newSettings.disableTimezone) {
-            settings.disableTimezone = true;
-        }
+    if (settings.currentLocale) {
+        scope.settings.currentLocale = settings.currentLocale;
     }
+    if (settings.locale) {
+        scope.settings.currentLocale = settings.locale;
+    }
+    if (settings.disableTimezone) {
+        scope.settings.disableTimezone = true;
+    } else {
+        scope.settings.disableTimezone = false;
+    }
+
 }
 
 function newDate(settings) {
