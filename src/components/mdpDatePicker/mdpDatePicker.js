@@ -515,6 +515,10 @@ module.directive("mdpDatePicker", ["$mdpDatePicker", "$timeout", "$mdpLocale", f
                             }
                             value.minutes(0);
                             value.hours(0)
+                            if (!value.isValid()) {
+                                value = extendedMoment({attrs: [ngModel.$modelValue], disableTimezone: scope.settings.disableTimezone}).setLocale(scope.settings.currentLocale).moment;
+                                ok = false;
+                            }
                         }
                     } else {
                         if (angular.isDate(date)) {
