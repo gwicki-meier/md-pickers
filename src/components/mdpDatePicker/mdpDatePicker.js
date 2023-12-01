@@ -182,11 +182,12 @@ function CalendarCtrl($scope) {
     var self = this;
 
     this.$onInit = function () {
+        self.localeData = self.date.moment.localeData();
         self.daysInMonth = [];
-        self.dow = self.date.moment.localeData().firstDayOfWeek();
+        self.dow = self.localeData.firstDayOfWeek();
         self.weekDays = [].concat(
-            moment.weekdaysMin().slice(self.dow),
-            moment.weekdaysMin().slice(0, self.dow)
+            self.localeData.weekdaysMin().slice(self.dow),
+            self.localeData.weekdaysMin().slice(0, self.dow)
         );
         $scope.$watch(function () {
             return self.date.moment.unix()
