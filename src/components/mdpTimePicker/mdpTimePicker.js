@@ -433,7 +433,7 @@ module.directive("mdpTimePicker", ["$mdpTimePicker", "$timeout", "$mdpLocale", f
                     if (time === "") {
                         var previousValue = ngModel.$modelValue;
                         ok = false;
-                        if (previousValue === null) {
+                        if (previousValue === null || angular.isUndefined(previousValue)) {
                             previousValue = newDate(scope.settings)
                             // No Time or Date was set before, so we set the current time
                             ok = true;
