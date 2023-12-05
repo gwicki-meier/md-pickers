@@ -8,6 +8,7 @@ function TimePickerCtrl($scope, $mdDialog, time, autoSwitch, ampm, $mdMedia, opt
     this.currentView = this.VIEW_HOURS;
     this.time = extendedMoment({attrs: [time], disableTimezone: options.settings.disableTimezone});
     this.time.setLocale(options.settings.currentLocale);
+    this.autoSwitch = !!autoSwitch;
     this.ampm = !!ampm;
 
     this.hoursFormat = self.ampm ? "h" : "H";
@@ -257,7 +258,8 @@ module.provider("$mdpTimePicker", function() {
                 locals: {
                     time: time,
                     autoSwitch: options.autoSwitch,
-                    ampm: angular.isDefined(options.ampm) ? options.ampm : $mdpLocale.time.ampm, options: options
+                    ampm: angular.isDefined(options.ampm) ? options.ampm : $mdpLocale.time.ampm,
+                    options: options,
                 },
                 multiple: true,
                 parent: PARENT_GETTER()
