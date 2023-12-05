@@ -58,9 +58,6 @@ function newDate(settings) {
 var extendedMoment = (function ({attrs, disableTimezone}){
 
     class DateTime {
-        currentLocale = "de-ch";
-        disableTimezone = false;
-        moment;
         constructor({attrs, disableTimezone}){
             if (disableTimezone) {
                 this.moment = moment.utc(...attrs);
@@ -69,6 +66,7 @@ var extendedMoment = (function ({attrs, disableTimezone}){
                 this.moment = moment.utc(...attrs).tz(moment.tz.guess())
                 this.disableTimezone = false;
             }
+            this.currentLocale = "de-ch";
         }
     }
 
